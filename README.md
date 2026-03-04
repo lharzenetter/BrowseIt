@@ -120,4 +120,4 @@ file-explorer/
 
 ## License
 
-MIT
+[MIT](./LICENSE)
