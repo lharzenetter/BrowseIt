@@ -28,6 +28,23 @@ Completely built by AI.
 
 ## Getting Started
 
+Required develepment tools:
+
+```bash
+# Optional, if you have Rust already installed
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+echo "
+source $HOME/.cargo/env" > $HOME/.zshrc
+
+source $HOME/.cargo/env
+```
+
+```bash
+# Optional, if you have node already installed
+nvm install node
+```
+
 ### Install dependencies
 
 ```bash
@@ -43,16 +60,6 @@ npx tauri dev
 This starts the Vite dev server with hot reload and opens the Tauri window.
 
 ### Build for production
-
-```bash
-# Optional, if you have Rust already installed
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-echo "
-source $HOME/.cargo/env" > $HOME/.zshrc
-
-source $HOME/.cargo/env
-```
 
 ```bash
 npx tauri build
