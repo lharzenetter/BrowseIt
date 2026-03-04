@@ -193,18 +193,6 @@ export const Toolbar = ({
           </svg>
         </button>
         <button
-          className="toolbar-icon-btn"
-          disabled={!hasSelection}
-          title="Share"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="13" cy="4" r="2" stroke="currentColor" strokeWidth="1.2"/>
-            <circle cx="5" cy="9" r="2" stroke="currentColor" strokeWidth="1.2"/>
-            <circle cx="13" cy="14" r="2" stroke="currentColor" strokeWidth="1.2"/>
-            <path d="M6.8 8L11.2 5M6.8 10L11.2 13" stroke="currentColor" strokeWidth="1.2"/>
-          </svg>
-        </button>
-        <button
           className="toolbar-icon-btn toolbar-icon-btn-danger"
           onClick={onDelete}
           disabled={!hasSelection}
