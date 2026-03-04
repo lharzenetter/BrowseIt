@@ -155,7 +155,7 @@ export const ContextMenu = ({
               <path d="M4 8h5" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
             </svg>
             <span className="ctx-label">Copy as path</span>
-            <span className="ctx-shortcut">Ctrl+Shift+C</span>
+            <span className="ctx-shortcut">Cmd+Shift+C</span>
           </div>
 
           <div className="context-menu-item" onClick={onGetInfo}>

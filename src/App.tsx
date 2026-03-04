@@ -39,7 +39,13 @@ function App() {
         return;
       }
 
-      if (meta && e.key === 'c') {
+      if (meta && e.shiftKey && e.key === 'c') {
+        e.preventDefault();
+        if (explorer.selectedPaths.size > 0) {
+          const paths = Array.from(explorer.selectedPaths).join('\n');
+          navigator.clipboard.writeText(paths);
+        }
+      } else if (meta && e.key === 'c') {
         e.preventDefault();
         explorer.copyToClipboard();
       } else if (meta && e.key === 'x') {
