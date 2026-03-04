@@ -393,6 +393,117 @@ fn open_new_window(app: tauri::AppHandle, path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn compress_to_zip(paths: Vec<String>) -> Result<String, String> {
+    if paths.is_empty() {
+        return Err("No files selected to compress".to_string());
+    }
+
+    // Determine the output zip path: place it next to the first item
+    let first = Path::new(&paths[0]);
+    let parent = first.parent().ok_or("Cannot determine parent directory")?;
+    let zip_name = if paths.len() == 1 {
+        let stem = first
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| "archive".to_string());
+        format!("{}.zip", stem)
+    } else {
+        "Archive.zip".to_string()
+    };
+
+    // Avoid overwriting: append a number if the file already exists
+    let mut zip_path = parent.join(&zip_name);
+    let mut counter = 1u32;
+    while zip_path.exists() {
+        let stem = zip_path
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| "Archive".to_string());
+        // Strip any previous " (N)" suffix
+        let base = if let Some(pos) = stem.rfind(" (") {
+            stem[..pos].to_string()
+        } else {
+            stem
+        };
+        zip_path = parent.join(format!("{} ({}).zip", base, counter));
+        counter += 1;
+    }
+
+    let file = fs::File::create(&zip_path)
+        .map_err(|e| format!("Failed to create zip file: {}", e))?;
+    let mut zip_writer = zip::ZipWriter::new(file);
+    let options = zip::write::SimpleFileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated);
+
+    for source in &paths {
+        let src_path = Path::new(source);
+        if src_path.is_dir() {
+            add_dir_to_zip(&mut zip_writer, src_path, src_path, options)?;
+        } else {
+            let file_name = src_path
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+            zip_writer
+                .start_file(&file_name, options)
+                .map_err(|e| format!("Failed to add file to zip: {}", e))?;
+            let content = fs::read(src_path)
+                .map_err(|e| format!("Failed to read file: {}", e))?;
+            std::io::Write::write_all(&mut zip_writer, &content)
+                .map_err(|e| format!("Failed to write to zip: {}", e))?;
+        }
+    }
+
+    zip_writer
+        .finish()
+        .map_err(|e| format!("Failed to finalize zip: {}", e))?;
+
+    Ok(zip_path.to_string_lossy().to_string())
+}
+
+fn add_dir_to_zip(
+    zip_writer: &mut zip::ZipWriter<fs::File>,
+    base: &Path,
+    dir: &Path,
+    options: zip::write::SimpleFileOptions,
+) -> Result<(), String> {
+    let walker = walkdir::WalkDir::new(dir)
+        .follow_links(false)
+        .into_iter()
+        .filter_map(|e| e.ok());
+
+    for entry in walker {
+        let path = entry.path();
+        // Build the relative path from the base's parent so the top-level folder is included
+        let prefix = base.parent().unwrap_or(base);
+        let relative = path
+            .strip_prefix(prefix)
+            .map_err(|e| format!("Path error: {}", e))?;
+        let name = relative.to_string_lossy().to_string();
+
+        if path.is_dir() {
+            let dir_name = if name.ends_with('/') {
+                name
+            } else {
+                format!("{}/", name)
+            };
+            zip_writer
+                .add_directory(&dir_name, options)
+                .map_err(|e| format!("Failed to add directory to zip: {}", e))?;
+        } else {
+            zip_writer
+                .start_file(&name, options)
+                .map_err(|e| format!("Failed to add file to zip: {}", e))?;
+            let content = fs::read(path)
+                .map_err(|e| format!("Failed to read file: {}", e))?;
+            std::io::Write::write_all(zip_writer, &content)
+                .map_err(|e| format!("Failed to write to zip: {}", e))?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
 fn search_files(directory: String, query: String, max_results: usize) -> Result<SearchResult, String> {
     let query_lower = query.to_lowercase();
     let mut entries = Vec::new();
@@ -597,6 +708,7 @@ pub fn run() {
             open_file,
             open_in_terminal,
             open_new_window,
+            compress_to_zip,
             search_files,
             get_parent_path,
             read_text_file,

@@ -139,6 +139,19 @@ function App() {
         );
         break;
       }
+      case 'compressToZip': {
+        const zipPaths = contextMenu.target
+          ? (explorer.selectedPaths.has(contextMenu.target.path)
+              ? Array.from(explorer.selectedPaths)
+              : [contextMenu.target.path])
+          : [];
+        if (zipPaths.length > 0) {
+          invoke('compress_to_zip', { paths: zipPaths })
+            .then(() => explorer.refresh())
+            .catch((e) => explorer.setError(String(e)));
+        }
+        break;
+      }
       case 'copy':
         if (contextMenu.target) {
           const paths = explorer.selectedPaths.has(contextMenu.target.path)
@@ -322,6 +335,7 @@ function App() {
         onClose={closeContextMenu}
         onOpen={() => handleContextMenuAction('open')}
         onOpenInNewWindow={() => handleContextMenuAction('openInNewWindow')}
+        onCompressToZip={() => handleContextMenuAction('compressToZip')}
         onCopy={() => handleContextMenuAction('copy')}
         onCut={() => handleContextMenuAction('cut')}
         onPaste={() => handleContextMenuAction('paste')}

@@ -15,6 +15,7 @@ interface ContextMenuProps {
   onGetInfo: () => void;
   onOpenInTerminal: () => void;
   onOpenInNewWindow: () => void;
+  onCompressToZip: () => void;
   onPinQuickAccess: (path: string) => void;
   onUnpinQuickAccess: (path: string) => void;
   isPinned: boolean;
@@ -36,6 +37,7 @@ export const ContextMenu = ({
   onGetInfo,
   onOpenInTerminal,
   onOpenInNewWindow,
+  onCompressToZip,
   hasClipboard,
   onPinQuickAccess,
   onUnpinQuickAccess,
@@ -125,7 +127,7 @@ export const ContextMenu = ({
             </div>
           )}
 
-          <div className="context-menu-item" onClick={() => {}}>
+          <div className="context-menu-item" onClick={onCompressToZip}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M3 4h10l-1 9H4L3 4z" stroke="currentColor" strokeWidth="1"/>
               <path d="M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" stroke="currentColor" strokeWidth="1"/>
