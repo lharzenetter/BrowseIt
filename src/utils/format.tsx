@@ -18,8 +18,16 @@ export function formatDate(epoch: number | null): string {
   });
 }
 
-export function getFileIcon(entry: { is_dir: boolean; extension: string; name: string }): string {
-  if (entry.is_dir) return '📁';
+import type { ReactNode } from 'react';
+
+export function getFileIcon(entry: { is_dir: boolean; extension: string; name: string }): ReactNode {
+  if (entry.is_dir) {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6l1.5 1.5H12.5C13.33 4.5 14 5.17 14 6V11.5C14 12.33 13.33 13 12.5 13H3.5C2.67 13 2 12.33 2 11.5V4.5Z" fill="#FFB900" stroke="#E6A700" strokeWidth="0.5"/>
+      </svg>
+    );
+  }
 
   const ext = entry.extension.toLowerCase();
 

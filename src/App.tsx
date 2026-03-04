@@ -215,9 +215,11 @@ function App() {
       <div className="main-area">
         <Sidebar
           quickAccessPaths={explorer.quickAccessPaths}
+          pinnedPaths={explorer.pinnedPaths}
           volumes={explorer.volumes}
           currentPath={explorer.currentPath}
           onNavigate={(path) => explorer.navigateTo(path)}
+          onUnpin={(path) => explorer.unpinQuickAccess(path)}
         />
         <div className="content-area">
           {explorer.error && (
@@ -280,6 +282,19 @@ function App() {
         onNewFolder={() => handleContextMenuAction('newFolder')}
         onNewFile={() => handleContextMenuAction('newFile')}
         onGetInfo={() => handleContextMenuAction('info')}
+        onPinQuickAccess={(path) => {
+          closeContextMenu();
+          explorer.pinQuickAccess(path);
+        }}
+        onUnpinQuickAccess={(path) => {
+          closeContextMenu();
+          explorer.unpinQuickAccess(path);
+        }}
+        isPinned={
+          contextMenu.target
+            ? explorer.pinnedPaths.includes(contextMenu.target.path)
+            : false
+        }
         hasClipboard={explorer.clipboard !== null}
         selectionCount={explorer.selectedPaths.size}
       />

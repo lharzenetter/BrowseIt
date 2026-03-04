@@ -1,5 +1,7 @@
 # File Explorer
 
+[![License Badge](https://img.shields.io/badge/License-MIT-brightgreen.svg)](./LICENSE)
+
 A Windows Explorer-style file manager for macOS, built with Tauri 2 (Rust) and React + TypeScript.
 
 ## Features
@@ -117,7 +119,3 @@ file-explorer/
 - **Backend:** Rust via [Tauri 2](https://v2.tauri.app/) -- native performance, ~10 MB bundle
 - **Frontend:** React 19 + TypeScript + [Vite](https://vite.dev/)
 - **File operations:** Direct filesystem access through Rust, trash support via [`trash`](https://crates.io/crates/trash), file opening via [`open`](https://crates.io/crates/open), recursive search via [`walkdir`](https://crates.io/crates/walkdir)
-
-## License
-
-[MIT](./LICENSE)

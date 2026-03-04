@@ -13,6 +13,9 @@ interface ContextMenuProps {
   onNewFolder: () => void;
   onNewFile: () => void;
   onGetInfo: () => void;
+  onPinQuickAccess: (path: string) => void;
+  onUnpinQuickAccess: (path: string) => void;
+  isPinned: boolean;
   hasClipboard: boolean;
   selectionCount: number;
 }
@@ -30,6 +33,9 @@ export const ContextMenu = ({
   onNewFile,
   onGetInfo,
   hasClipboard,
+  onPinQuickAccess,
+  onUnpinQuickAccess,
+  isPinned,
 }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -93,12 +99,27 @@ export const ContextMenu = ({
 
           <div className="context-menu-separator" />
 
-          <div className="context-menu-item" onClick={() => {}}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M5 1L6.5 4H9L7 6l1 3.5L5 7.5 2 9.5l1-3.5L1 4h2.5L5 1z" fill="none" stroke="currentColor" strokeWidth="1"/>
-            </svg>
-            <span className="ctx-label ctx-label-bold">Pin to Quick access</span>
-          </div>
+          {state.target?.is_dir && !isPinned && (
+            <div className="context-menu-item" onClick={() => {
+              if (state.target) onPinQuickAccess(state.target.path);
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2L9.8 5.8H14L10.6 8.2L12 12.5L8 9.7L4 12.5L5.4 8.2L2 5.8H6.2L8 2z" fill="none" stroke="currentColor" strokeWidth="1"/>
+              </svg>
+              <span className="ctx-label ctx-label-bold">Pin to Quick access</span>
+            </div>
+          )}
+
+          {state.target?.is_dir && isPinned && (
+            <div className="context-menu-item" onClick={() => {
+              if (state.target) onUnpinQuickAccess(state.target.path);
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2L9.8 5.8H14L10.6 8.2L12 12.5L8 9.7L4 12.5L5.4 8.2L2 5.8H6.2L8 2z" fill="currentColor" stroke="currentColor" strokeWidth="1"/>
+              </svg>
+              <span className="ctx-label">Unpin from Quick access</span>
+            </div>
+          )}
 
           <div className="context-menu-item" onClick={() => {}}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

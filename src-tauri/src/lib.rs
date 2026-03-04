@@ -383,6 +383,63 @@ mod dirs {
     }
 }
 
+/// Returns the path to the quick_access.json config file.
+fn quick_access_config_path() -> Result<PathBuf, String> {
+    let home = dirs::home_dir().ok_or("No home directory")?;
+    let config_dir = home.join(".config").join("file-explorer");
+    fs::create_dir_all(&config_dir)
+        .map_err(|e| format!("Failed to create config directory: {}", e))?;
+    Ok(config_dir.join("quick_access.json"))
+}
+
+#[tauri::command]
+fn get_pinned_quick_access() -> Result<Vec<String>, String> {
+    let config_path = quick_access_config_path()?;
+    if !config_path.exists() {
+        return Ok(Vec::new());
+    }
+    let content = fs::read_to_string(&config_path)
+        .map_err(|e| format!("Failed to read quick access config: {}", e))?;
+    let paths: Vec<String> = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse quick access config: {}", e))?;
+    // Filter out paths that no longer exist
+    Ok(paths.into_iter().filter(|p| Path::new(p).exists()).collect())
+}
+
+#[tauri::command]
+fn add_pinned_quick_access(path: String) -> Result<Vec<String>, String> {
+    let mut pinned = get_pinned_quick_access().unwrap_or_default();
+    if !pinned.contains(&path) {
+        // Verify the path exists and is a directory
+        let p = Path::new(&path);
+        if !p.exists() {
+            return Err(format!("Path does not exist: {}", path));
+        }
+        if !p.is_dir() {
+            return Err("Only directories can be pinned to Quick access".to_string());
+        }
+        pinned.push(path);
+        save_pinned_quick_access(&pinned)?;
+    }
+    Ok(pinned)
+}
+
+#[tauri::command]
+fn remove_pinned_quick_access(path: String) -> Result<Vec<String>, String> {
+    let mut pinned = get_pinned_quick_access().unwrap_or_default();
+    pinned.retain(|p| p != &path);
+    save_pinned_quick_access(&pinned)?;
+    Ok(pinned)
+}
+
+fn save_pinned_quick_access(paths: &[String]) -> Result<(), String> {
+    let config_path = quick_access_config_path()?;
+    let content = serde_json::to_string_pretty(paths)
+        .map_err(|e| format!("Failed to serialize quick access: {}", e))?;
+    fs::write(&config_path, content)
+        .map_err(|e| format!("Failed to write quick access config: {}", e))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -417,6 +474,9 @@ pub fn run() {
             get_parent_path,
             read_text_file,
             get_path_components,
+            get_pinned_quick_access,
+            add_pinned_quick_access,
+            remove_pinned_quick_access,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

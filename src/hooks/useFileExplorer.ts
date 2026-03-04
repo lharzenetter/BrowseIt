@@ -30,6 +30,7 @@ export function useFileExplorer() {
   const [showPreview, setShowPreview] = useState(false);
   const [renamingPath, setRenamingPath] = useState<string | null>(null);
   const [quickAccessPaths, setQuickAccessPaths] = useState<[string, string][]>([]);
+  const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
   const [volumes, setVolumes] = useState<{ name: string; mount_point: string }[]>([]);
 
   // Initialize
@@ -39,8 +40,10 @@ export function useFileExplorer() {
         const home = await invoke<string>('get_home_directory');
         const qaPaths = await invoke<[string, string][]>('get_quick_access_paths');
         const vols = await invoke<{ name: string; mount_point: string }[]>('get_volumes');
+        const pinned = await invoke<string[]>('get_pinned_quick_access');
         setQuickAccessPaths(qaPaths);
         setVolumes(vols);
+        setPinnedPaths(pinned);
 
         const tabId = generateTabId();
         setTabs([{ id: tabId, path: home, label: 'Home' }]);
@@ -246,6 +249,24 @@ export function useFileExplorer() {
     }
   }, [currentPath]);
 
+  const pinQuickAccess = useCallback(async (path: string) => {
+    try {
+      const updated = await invoke<string[]>('add_pinned_quick_access', { path });
+      setPinnedPaths(updated);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, []);
+
+  const unpinQuickAccess = useCallback(async (path: string) => {
+    try {
+      const updated = await invoke<string[]>('remove_pinned_quick_access', { path });
+      setPinnedPaths(updated);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, []);
+
   const addTab = useCallback(() => {
     const tabId = generateTabId();
     const newTab: Tab = {
@@ -367,7 +388,10 @@ export function useFileExplorer() {
     renamingPath,
     setRenamingPath,
     quickAccessPaths,
+    pinnedPaths,
     volumes,
+    pinQuickAccess,
+    unpinQuickAccess,
     history,
     historyIndex,
     navigateTo,

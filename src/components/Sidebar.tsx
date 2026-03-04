@@ -2,21 +2,27 @@ import { useState, type ReactNode } from 'react';
 
 interface SidebarProps {
   quickAccessPaths: [string, string][];
+  pinnedPaths: string[];
   volumes: { name: string; mount_point: string }[];
   currentPath: string;
   onNavigate: (path: string) => void;
+  onUnpin: (path: string) => void;
 }
 
 export const Sidebar = ({
   quickAccessPaths,
+  pinnedPaths,
   volumes,
   currentPath,
   onNavigate,
+  onUnpin,
 }: SidebarProps) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    quickaccess: true,
     home: true,
     thispc: true,
   });
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(null);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -78,6 +84,12 @@ export const Sidebar = ({
     </svg>
   );
 
+  const pinnedFolderIcon = (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6l1.5 1.5H12.5C13.33 4.5 14 5.17 14 6V11.5C14 12.33 13.33 13 12.5 13H3.5C2.67 13 2 12.33 2 11.5V4.5Z" fill="#48a3e0" stroke="#2b88c9" strokeWidth="0.5"/>
+    </svg>
+  );
+
   const volumeIcon = (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <rect x="2" y="4" width="12" height="8" rx="1.5" stroke="#666" strokeWidth="1.2"/>
@@ -97,9 +109,59 @@ export const Sidebar = ({
     </svg>
   );
 
+  const pinIcon = (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M6 1.5L4 5H2.5L4 6.5 3 10.5 6 8.5 9 10.5 8 6.5 9.5 5H8L6 1.5z" fill="#888" opacity="0.5"/>
+    </svg>
+  );
+
+  const handlePinnedContextMenu = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, path });
+  };
+
+  // Close sidebar context menu on any click
+  const handleGlobalClick = () => {
+    if (contextMenu) setContextMenu(null);
+  };
+
   return (
-    <div className="sidebar">
-      {/* Home / Quick Access section */}
+    <div className="sidebar" onClick={handleGlobalClick}>
+      {/* Quick Access section - user-pinned folders */}
+      {pinnedPaths.length > 0 && (
+        <>
+          <div className="sidebar-tree-item sidebar-tree-root"
+            onClick={() => toggleSection('quickaccess')}>
+            <Chevron expanded={expandedSections.quickaccess !== false} />
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2L9.8 5.8H14L10.6 8.2L12 12.5L8 9.7L4 12.5L5.4 8.2L2 5.8H6.2L8 2z" fill="#FFB900" stroke="#E6A700" strokeWidth="0.5"/>
+            </svg>
+            <span className="sidebar-tree-label">Quick access</span>
+          </div>
+          {expandedSections.quickaccess !== false && (
+            <div className="sidebar-tree-children">
+              {pinnedPaths.map((path) => {
+                const name = path.split('/').pop() || path;
+                return (
+                  <div
+                    key={path}
+                    className={`sidebar-tree-item sidebar-tree-leaf ${currentPath === path ? 'active' : ''}`}
+                    onClick={() => onNavigate(path)}
+                    onContextMenu={(e) => handlePinnedContextMenu(e, path)}
+                  >
+                    <span className="sidebar-tree-icon">{pinnedFolderIcon}</span>
+                    <span className="sidebar-tree-label">{name}</span>
+                    {pinIcon}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Home section - system folders */}
       <div className="sidebar-tree-item sidebar-tree-root"
         onClick={() => toggleSection('home')}>
         <Chevron expanded={expandedSections.home !== false} />
@@ -119,11 +181,6 @@ export const Sidebar = ({
             >
               <span className="sidebar-tree-icon">{sidebarIcons[name] || defaultFolderIcon}</span>
               <span className="sidebar-tree-label">{name}</span>
-              {(name === 'Desktop' || name === 'Downloads' || name === 'Documents' || name === 'Pictures' || name === 'Music' || name === 'Movies') && (
-                <svg className="sidebar-pin" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M5 1L6.5 4H9L7 6l1 3.5L5 7.5 2 9.5l1-3.5L1 4h2.5L5 1z" fill="#666" opacity="0.4"/>
-                </svg>
-              )}
             </div>
           ))}
         </div>
@@ -152,6 +209,29 @@ export const Sidebar = ({
               <span className="sidebar-tree-label">{vol.name}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Sidebar right-click menu for pinned items */}
+      {contextMenu && (
+        <div
+          className="sidebar-context-menu"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sidebar-ctx-item" onClick={() => {
+            onNavigate(contextMenu.path);
+            setContextMenu(null);
+          }}>
+            Open
+          </div>
+          <div className="sidebar-ctx-separator" />
+          <div className="sidebar-ctx-item sidebar-ctx-item-danger" onClick={() => {
+            onUnpin(contextMenu.path);
+            setContextMenu(null);
+          }}>
+            Unpin from Quick access
+          </div>
         </div>
       )}
     </div>

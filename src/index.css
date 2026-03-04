@@ -673,11 +673,48 @@ body {
 .sidebar-pin {
   margin-left: auto;
   flex-shrink: 0;
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .sidebar-tree-leaf:hover .sidebar-pin {
-  opacity: 1;
+  opacity: 0.8;
+}
+
+/* Sidebar right-click menu for pinned items */
+.sidebar-context-menu {
+  position: fixed;
+  background: rgba(252, 252, 252, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--stroke-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-flyout);
+  min-width: 190px;
+  padding: 4px;
+  z-index: 1000;
+}
+
+.sidebar-ctx-item {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.sidebar-ctx-item:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar-ctx-item-danger:hover {
+  background: rgba(196, 43, 28, 0.08);
+  color: var(--danger);
+}
+
+.sidebar-ctx-separator {
+  height: 1px;
+  background: var(--stroke-divider);
+  margin: 4px 10px;
 }
 
 /* ================================================================
