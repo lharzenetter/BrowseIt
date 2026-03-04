@@ -307,15 +307,6 @@ export const Toolbar = ({
 
       <div className="toolbar-spacer" />
 
-      {/* Overflow / more */}
-      <button className="toolbar-icon-btn" title="See more">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <circle cx="5" cy="9" r="1.2" fill="currentColor"/>
-          <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
-          <circle cx="13" cy="9" r="1.2" fill="currentColor"/>
-        </svg>
-      </button>
-
       {/* Settings */}
       <button className="toolbar-icon-btn" onClick={onOpenSettings} title="Settings">
         <svg width="18" height="18" viewBox="0 0 512 512" fill="none">
