@@ -5,8 +5,6 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::SystemTime;
-#[allow(unused_imports)]
-use tauri::Manager;
 use tauri::webview::WebviewWindowBuilder;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
