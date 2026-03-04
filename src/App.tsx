@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { useFileExplorer } from './hooks/useFileExplorer';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
@@ -8,7 +9,7 @@ import { FileList } from './components/FileList';
 import { ContextMenu } from './components/ContextMenu';
 import { PreviewPanel } from './components/PreviewPanel';
 import { StatusBar } from './components/StatusBar';
-import type { ContextMenuState } from './types';
+import type { ContextMenuState, FileEntry } from './types';
 
 function App() {
   const explorer = useFileExplorer();
@@ -165,6 +166,30 @@ function App() {
         if (contextMenu.target) {
           explorer.setPreviewEntry(contextMenu.target);
           explorer.setShowPreview(true);
+        } else {
+          // No target — show properties of the current directory
+          invoke<FileEntry>('get_file_info', { path: explorer.currentPath })
+            .then((dirEntry) => {
+              explorer.setPreviewEntry(dirEntry);
+              explorer.setShowPreview(true);
+            })
+            .catch(() => {
+              // Fallback with basic info if command fails
+              const dirName = explorer.currentPath.split('/').pop() || '/';
+              explorer.setPreviewEntry({
+                name: dirName,
+                path: explorer.currentPath,
+                is_dir: true,
+                is_hidden: false,
+                is_symlink: false,
+                size: 0,
+                modified: null,
+                created: null,
+                extension: '',
+                permissions: '',
+              });
+              explorer.setShowPreview(true);
+            });
         }
         break;
     }
@@ -249,7 +274,6 @@ function App() {
             }}
             onDrop={async (sources, destination) => {
               try {
-                const { invoke } = await import('@tauri-apps/api/core');
                 await invoke('move_items', { sources, destination });
                 explorer.refresh();
               } catch (e) {
