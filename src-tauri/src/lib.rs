@@ -313,6 +313,60 @@ fn open_file(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn open_in_terminal(path: String) -> Result<(), String> {
+    let dir = if std::fs::metadata(&path)
+        .map(|m| m.is_dir())
+        .unwrap_or(false)
+    {
+        path.clone()
+    } else {
+        Path::new(&path)
+            .parent()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or(path)
+    };
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .args(["-a", "Terminal", &dir])
+            .spawn()
+            .map_err(|e| format!("Failed to open terminal: {}", e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        // Try common terminal emulators in order
+        let terminals = ["x-terminal-emulator", "gnome-terminal", "konsole", "xterm"];
+        let mut opened = false;
+        for term in &terminals {
+            if std::process::Command::new(term)
+                .arg("--working-directory")
+                .arg(&dir)
+                .spawn()
+                .is_ok()
+            {
+                opened = true;
+                break;
+            }
+        }
+        if !opened {
+            return Err("No terminal emulator found".to_string());
+        }
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("cmd")
+            .args(["/c", "start", "cmd", "/k", &format!("cd /d {}", dir)])
+            .spawn()
+            .map_err(|e| format!("Failed to open terminal: {}", e))?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 fn search_files(directory: String, query: String, max_results: usize) -> Result<SearchResult, String> {
     let query_lower = query.to_lowercase();
     let mut entries = Vec::new();
@@ -470,6 +524,7 @@ pub fn run() {
             move_items,
             get_file_info,
             open_file,
+            open_in_terminal,
             search_files,
             get_parent_path,
             read_text_file,

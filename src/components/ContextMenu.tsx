@@ -13,6 +13,7 @@ interface ContextMenuProps {
   onNewFolder: () => void;
   onNewFile: () => void;
   onGetInfo: () => void;
+  onOpenInTerminal: () => void;
   onPinQuickAccess: (path: string) => void;
   onUnpinQuickAccess: (path: string) => void;
   isPinned: boolean;
@@ -32,6 +33,7 @@ export const ContextMenu = ({
   onNewFolder,
   onNewFile,
   onGetInfo,
+  onOpenInTerminal,
   hasClipboard,
   onPinQuickAccess,
   onUnpinQuickAccess,
@@ -150,7 +152,7 @@ export const ContextMenu = ({
             <span className="ctx-shortcut">Alt+Enter</span>
           </div>
 
-          <div className="context-menu-item" onClick={() => {}}>
+          <div className="context-menu-item" onClick={onOpenInTerminal}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="2" y="4" width="12" height="9" rx="1" stroke="currentColor" strokeWidth="1"/>
               <path d="M5 7h6M5 9.5h3" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>

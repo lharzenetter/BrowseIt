@@ -162,6 +162,15 @@ function App() {
       case 'newFile':
         setNewItemPrompt('file');
         break;
+      case 'openInTerminal': {
+        const terminalPath = contextMenu.target
+          ? contextMenu.target.path
+          : explorer.currentPath;
+        invoke('open_in_terminal', { path: terminalPath }).catch((e) =>
+          explorer.setError(String(e))
+        );
+        break;
+      }
       case 'info':
         if (contextMenu.target) {
           explorer.setPreviewEntry(contextMenu.target);
@@ -309,6 +318,7 @@ function App() {
         onNewFolder={() => handleContextMenuAction('newFolder')}
         onNewFile={() => handleContextMenuAction('newFile')}
         onGetInfo={() => handleContextMenuAction('info')}
+        onOpenInTerminal={() => handleContextMenuAction('openInTerminal')}
         onPinQuickAccess={(path) => {
           closeContextMenu();
           explorer.pinQuickAccess(path);

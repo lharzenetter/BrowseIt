@@ -45,6 +45,16 @@ This starts the Vite dev server with hot reload and opens the Tauri window.
 ### Build for production
 
 ```bash
+# Optional, if you have Rust already installed
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+echo "
+source $HOME/.cargo/env" > $HOME/.zshrc
+
+source $HOME/.cargo/env
+```
+
+```bash
 npx tauri build
 ```
 
