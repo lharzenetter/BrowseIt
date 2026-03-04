@@ -23,6 +23,7 @@ interface ToolbarProps {
   sortField: SortField;
   sortDirection: SortDirection;
   onToggleSort: (field: SortField) => void;
+  onOpenSettings: () => void;
 }
 
 export const Toolbar = ({
@@ -41,6 +42,7 @@ export const Toolbar = ({
   sortField,
   sortDirection,
   onToggleSort,
+  onOpenSettings,
 }: ToolbarProps) => {
   const [showNewMenu, setShowNewMenu] = useState(false);
   const [showViewMenu, setShowViewMenu] = useState(false);
@@ -323,6 +325,14 @@ export const Toolbar = ({
           <circle cx="5" cy="9" r="1.2" fill="currentColor"/>
           <circle cx="9" cy="9" r="1.2" fill="currentColor"/>
           <circle cx="13" cy="9" r="1.2" fill="currentColor"/>
+        </svg>
+      </button>
+
+      {/* Settings */}
+      <button className="toolbar-icon-btn" onClick={onOpenSettings} title="Settings">
+        <svg width="18" height="18" viewBox="0 0 512 512" fill="none">
+          <path d="M295 48h-78l-12 62-24 10-50-42-55 55 42 50-10 24-62 12v78l62 12 10 24-42 50 55 55 50-42 24 10 12 62h78l12-62 24-10 50 42 55-55-42-50 10-24 62-12v-78l-62-12-10-24 42-50-55-55-50 42-24-10-12-62z" stroke="currentColor" strokeWidth="40" strokeLinejoin="round" fill="none"/>
+          <circle cx="256" cy="256" r="80" stroke="currentColor" strokeWidth="40" fill="none"/>
         </svg>
       </button>
     </div>

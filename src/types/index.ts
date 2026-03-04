@@ -44,3 +44,7 @@ export interface ContextMenuState {
   y: number;
   target: FileEntry | null;
 }
+
+export interface AppSettings {
+  terminal: string;
+}

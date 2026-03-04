@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import type { FileEntry, Tab, ClipboardData, SortField, SortDirection, ViewMode } from '../types';
+import type { FileEntry, Tab, ClipboardData, SortField, SortDirection, ViewMode, AppSettings } from '../types';
 
 let tabIdCounter = 1;
 
@@ -32,6 +32,7 @@ export function useFileExplorer() {
   const [quickAccessPaths, setQuickAccessPaths] = useState<[string, string][]>([]);
   const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
   const [volumes, setVolumes] = useState<{ name: string; mount_point: string }[]>([]);
+  const [settings, setSettingsState] = useState<AppSettings>({ terminal: 'Terminal' });
 
   // Initialize
   useEffect(() => {
@@ -41,9 +42,11 @@ export function useFileExplorer() {
         const qaPaths = await invoke<[string, string][]>('get_quick_access_paths');
         const vols = await invoke<{ name: string; mount_point: string }[]>('get_volumes');
         const pinned = await invoke<string[]>('get_pinned_quick_access');
+        const appSettings = await invoke<AppSettings>('get_settings');
         setQuickAccessPaths(qaPaths);
         setVolumes(vols);
         setPinnedPaths(pinned);
+        setSettingsState(appSettings);
 
         const tabId = generateTabId();
         setTabs([{ id: tabId, path: home, label: 'Home' }]);
@@ -258,6 +261,15 @@ export function useFileExplorer() {
     }
   }, []);
 
+  const saveSettings = useCallback(async (newSettings: AppSettings) => {
+    try {
+      await invoke('save_settings', { settings: newSettings });
+      setSettingsState(newSettings);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, []);
+
   const unpinQuickAccess = useCallback(async (path: string) => {
     try {
       const updated = await invoke<string[]>('remove_pinned_quick_access', { path });
@@ -390,6 +402,8 @@ export function useFileExplorer() {
     quickAccessPaths,
     pinnedPaths,
     volumes,
+    settings,
+    saveSettings,
     pinQuickAccess,
     unpinQuickAccess,
     history,

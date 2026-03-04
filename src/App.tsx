@@ -20,6 +20,7 @@ function App() {
     target: null,
   });
   const [newItemPrompt, setNewItemPrompt] = useState<'folder' | 'file' | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const closeContextMenu = useCallback(() => {
     setContextMenu(prev => ({ ...prev, visible: false }));
@@ -235,6 +236,7 @@ function App() {
         sortField={explorer.sortField}
         sortDirection={explorer.sortDirection}
         onToggleSort={explorer.toggleSort}
+        onOpenSettings={() => setShowSettings(true)}
       />
       <AddressBar
         currentPath={explorer.currentPath}
@@ -366,6 +368,47 @@ function App() {
               }}
             />
             <div className="modal-hint">Press Enter to create, Escape to cancel</div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="modal settings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">Settings</div>
+            <div className="settings-section">
+              <label className="settings-label">Terminal Application</label>
+              <div className="settings-terminal-options">
+                {[
+                  { value: 'Terminal', label: 'Terminal', desc: 'macOS built-in' },
+                  { value: 'iTerm', label: 'iTerm2', desc: 'iTerm2 terminal' },
+                ].map((opt) => (
+                  <div
+                    key={opt.value}
+                    className={`settings-terminal-option${explorer.settings.terminal === opt.value ? ' active' : ''}`}
+                    onClick={() => {
+                      explorer.saveSettings({ ...explorer.settings, terminal: opt.value });
+                    }}
+                  >
+                    <div className="settings-terminal-radio">
+                      <div className={`radio-outer${explorer.settings.terminal === opt.value ? ' checked' : ''}`}>
+                        {explorer.settings.terminal === opt.value && <div className="radio-inner" />}
+                      </div>
+                    </div>
+                    <div className="settings-terminal-info">
+                      <span className="settings-terminal-name">{opt.label}</span>
+                      <span className="settings-terminal-desc">{opt.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="settings-actions">
+              <button className="settings-btn" onClick={() => setShowSettings(false)}>
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

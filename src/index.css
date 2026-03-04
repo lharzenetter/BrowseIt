@@ -1386,3 +1386,120 @@ body {
 .dropdown-input input {
   user-select: text;
 }
+
+/* ================================================================
+   Settings Modal
+   ================================================================ */
+
+.settings-modal {
+  min-width: 400px;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.settings-terminal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-terminal-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-layer);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.settings-terminal-option:hover {
+  background: var(--bg-hover);
+  border-color: var(--stroke-default);
+}
+
+.settings-terminal-option.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.settings-terminal-radio {
+  flex-shrink: 0;
+}
+
+.radio-outer {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.1s;
+}
+
+.radio-outer.checked {
+  border-color: var(--accent);
+}
+
+.radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.settings-terminal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.settings-terminal-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-terminal-desc {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.settings-btn {
+  padding: 6px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.settings-btn:hover {
+  background: var(--bg-hover);
+}
+
+

@@ -326,12 +326,14 @@ fn open_in_terminal(path: String) -> Result<(), String> {
             .unwrap_or(path)
     };
 
+    let settings = get_settings().unwrap_or_default();
+
     #[cfg(target_os = "macos")]
     {
         std::process::Command::new("open")
-            .args(["-a", "Terminal", &dir])
+            .args(["-a", &settings.terminal, &dir])
             .spawn()
-            .map_err(|e| format!("Failed to open terminal: {}", e))?;
+            .map_err(|e| format!("Failed to open {}: {}", settings.terminal, e))?;
     }
 
     #[cfg(target_os = "linux")]
@@ -437,13 +439,23 @@ mod dirs {
     }
 }
 
-/// Returns the path to the quick_access.json config file.
-fn quick_access_config_path() -> Result<PathBuf, String> {
+/// Returns the config directory path, creating it if needed.
+fn config_dir() -> Result<PathBuf, String> {
     let home = dirs::home_dir().ok_or("No home directory")?;
     let config_dir = home.join(".config").join("file-explorer");
     fs::create_dir_all(&config_dir)
         .map_err(|e| format!("Failed to create config directory: {}", e))?;
-    Ok(config_dir.join("quick_access.json"))
+    Ok(config_dir)
+}
+
+/// Returns the path to the quick_access.json config file.
+fn quick_access_config_path() -> Result<PathBuf, String> {
+    Ok(config_dir()?.join("quick_access.json"))
+}
+
+/// Returns the path to the settings.json config file.
+fn settings_config_path() -> Result<PathBuf, String> {
+    Ok(config_dir()?.join("settings.json"))
 }
 
 #[tauri::command]
@@ -494,6 +506,41 @@ fn save_pinned_quick_access(paths: &[String]) -> Result<(), String> {
         .map_err(|e| format!("Failed to write quick access config: {}", e))
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AppSettings {
+    pub terminal: String,
+}
+
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            terminal: "Terminal".to_string(),
+        }
+    }
+}
+
+#[tauri::command]
+fn get_settings() -> Result<AppSettings, String> {
+    let config_path = settings_config_path()?;
+    if !config_path.exists() {
+        return Ok(AppSettings::default());
+    }
+    let content = fs::read_to_string(&config_path)
+        .map_err(|e| format!("Failed to read settings: {}", e))?;
+    let settings: AppSettings = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse settings: {}", e))?;
+    Ok(settings)
+}
+
+#[tauri::command]
+fn save_settings(settings: AppSettings) -> Result<(), String> {
+    let config_path = settings_config_path()?;
+    let content = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("Failed to serialize settings: {}", e))?;
+    fs::write(&config_path, content)
+        .map_err(|e| format!("Failed to write settings: {}", e))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -532,6 +579,8 @@ pub fn run() {
             get_pinned_quick_access,
             add_pinned_quick_access,
             remove_pinned_quick_access,
+            get_settings,
+            save_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
