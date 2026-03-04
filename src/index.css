@@ -339,6 +339,12 @@ body {
   background: var(--bg-selected);
 }
 
+.sort-direction {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
 .dropdown-item svg {
   flex-shrink: 0;
 }

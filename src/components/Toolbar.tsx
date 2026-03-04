@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import type { ViewMode } from '../types';
+import type { ViewMode, SortField, SortDirection } from '../types';
 
 interface ToolbarProps {
   canGoBack: boolean;
@@ -20,6 +20,9 @@ interface ToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
   showHidden: boolean;
   onToggleHidden: () => void;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onToggleSort: (field: SortField) => void;
 }
 
 export const Toolbar = ({
@@ -35,6 +38,9 @@ export const Toolbar = ({
   onViewModeChange,
   showHidden,
   onToggleHidden,
+  sortField,
+  sortDirection,
+  onToggleSort,
 }: ToolbarProps) => {
   const [showNewMenu, setShowNewMenu] = useState(false);
   const [showViewMenu, setShowViewMenu] = useState(false);
@@ -227,17 +233,25 @@ export const Toolbar = ({
         </button>
         {showSortMenu && (
           <div className="toolbar-dropdown">
-            <div className="dropdown-item" onClick={() => setShowSortMenu(false)}>
+            <div className={`dropdown-item ${sortField === 'name' ? 'dropdown-item-active' : ''}`}
+              onClick={() => { onToggleSort('name'); setShowSortMenu(false); }}>
               <span>Name</span>
+              {sortField === 'name' && <span className="sort-direction">{sortDirection === 'asc' ? '▲' : '▼'}</span>}
             </div>
-            <div className="dropdown-item" onClick={() => setShowSortMenu(false)}>
+            <div className={`dropdown-item ${sortField === 'modified' ? 'dropdown-item-active' : ''}`}
+              onClick={() => { onToggleSort('modified'); setShowSortMenu(false); }}>
               <span>Date modified</span>
+              {sortField === 'modified' && <span className="sort-direction">{sortDirection === 'asc' ? '▲' : '▼'}</span>}
             </div>
-            <div className="dropdown-item" onClick={() => setShowSortMenu(false)}>
+            <div className={`dropdown-item ${sortField === 'extension' ? 'dropdown-item-active' : ''}`}
+              onClick={() => { onToggleSort('extension'); setShowSortMenu(false); }}>
               <span>Type</span>
+              {sortField === 'extension' && <span className="sort-direction">{sortDirection === 'asc' ? '▲' : '▼'}</span>}
             </div>
-            <div className="dropdown-item" onClick={() => setShowSortMenu(false)}>
+            <div className={`dropdown-item ${sortField === 'size' ? 'dropdown-item-active' : ''}`}
+              onClick={() => { onToggleSort('size'); setShowSortMenu(false); }}>
               <span>Size</span>
+              {sortField === 'size' && <span className="sort-direction">{sortDirection === 'asc' ? '▲' : '▼'}</span>}
             </div>
           </div>
         )}

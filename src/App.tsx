@@ -198,6 +198,9 @@ function App() {
         onViewModeChange={explorer.setViewMode}
         showHidden={explorer.showHidden}
         onToggleHidden={() => explorer.setShowHidden(!explorer.showHidden)}
+        sortField={explorer.sortField}
+        sortDirection={explorer.sortDirection}
+        onToggleSort={explorer.toggleSort}
       />
       <AddressBar
         currentPath={explorer.currentPath}

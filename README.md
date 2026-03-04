@@ -4,6 +4,8 @@
 
 A Windows Explorer-style file manager for macOS, built with Tauri 2 (Rust) and React + TypeScript.
 
+Completely built by AI.
+
 ## Features
 
 - **Sidebar** with Quick Access folders (Desktop, Documents, Downloads, Pictures, Music, Movies, Applications) and mounted Volumes
