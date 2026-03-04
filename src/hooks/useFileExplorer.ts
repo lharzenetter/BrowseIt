@@ -48,10 +48,17 @@ export function useFileExplorer() {
         setPinnedPaths(pinned);
         setSettingsState(appSettings);
 
+        // Check if a path was passed via query param (new window)
+        const params = new URLSearchParams(window.location.search);
+        const initialPath = params.get('path') || home;
+        const initialLabel = initialPath === home
+          ? 'Home'
+          : initialPath.split('/').pop() || '/';
+
         const tabId = generateTabId();
-        setTabs([{ id: tabId, path: home, label: 'Home' }]);
+        setTabs([{ id: tabId, path: initialPath, label: initialLabel }]);
         setActiveTabId(tabId);
-        await navigateTo(home, true);
+        await navigateTo(initialPath, true);
       } catch (e) {
         setError(String(e));
       }

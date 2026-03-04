@@ -130,6 +130,15 @@ function App() {
       case 'open':
         if (contextMenu.target) explorer.openItem(contextMenu.target);
         break;
+      case 'openInNewWindow': {
+        const windowPath = contextMenu.target
+          ? (contextMenu.target.is_dir ? contextMenu.target.path : explorer.currentPath)
+          : explorer.currentPath;
+        invoke('open_new_window', { path: windowPath }).catch((e) =>
+          explorer.setError(String(e))
+        );
+        break;
+      }
       case 'copy':
         if (contextMenu.target) {
           const paths = explorer.selectedPaths.has(contextMenu.target.path)
@@ -312,6 +321,7 @@ function App() {
         state={contextMenu}
         onClose={closeContextMenu}
         onOpen={() => handleContextMenuAction('open')}
+        onOpenInNewWindow={() => handleContextMenuAction('openInNewWindow')}
         onCopy={() => handleContextMenuAction('copy')}
         onCut={() => handleContextMenuAction('cut')}
         onPaste={() => handleContextMenuAction('paste')}

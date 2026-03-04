@@ -916,6 +916,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-shell",
  "trash",
+ "urlencoding",
  "walkdir",
 ]
 

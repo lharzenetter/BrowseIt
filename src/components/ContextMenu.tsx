@@ -14,6 +14,7 @@ interface ContextMenuProps {
   onNewFile: () => void;
   onGetInfo: () => void;
   onOpenInTerminal: () => void;
+  onOpenInNewWindow: () => void;
   onPinQuickAccess: (path: string) => void;
   onUnpinQuickAccess: (path: string) => void;
   isPinned: boolean;
@@ -34,6 +35,7 @@ export const ContextMenu = ({
   onNewFile,
   onGetInfo,
   onOpenInTerminal,
+  onOpenInNewWindow,
   hasClipboard,
   onPinQuickAccess,
   onUnpinQuickAccess,
@@ -91,7 +93,7 @@ export const ContextMenu = ({
             <span className="ctx-label">Open</span>
           </div>
 
-          <div className="context-menu-item" onClick={() => {}}>
+          <div className="context-menu-item" onClick={onOpenInNewWindow}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="3" y="3" width="10" height="10" rx="1" stroke="currentColor" strokeWidth="1"/>
               <path d="M6 3V1.5h4V3" stroke="currentColor" strokeWidth="1"/>

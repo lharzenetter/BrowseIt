@@ -3,10 +3,11 @@ use std::fs;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::SystemTime;
-// Manager trait imported for plugin setup
 #[allow(unused_imports)]
 use tauri::Manager;
+use tauri::webview::WebviewWindowBuilder;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FileEntry {
@@ -368,6 +369,31 @@ fn open_in_terminal(path: String) -> Result<(), String> {
     Ok(())
 }
 
+static WINDOW_COUNTER: AtomicU32 = AtomicU32::new(1);
+
+#[tauri::command]
+fn open_new_window(app: tauri::AppHandle, path: String) -> Result<(), String> {
+    let id = WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let label = format!("explorer-{}", id);
+    let folder_name = Path::new(&path)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| path.clone());
+
+    let encoded_path = urlencoding::encode(&path);
+    let url_str = format!("index.html?path={}", encoded_path);
+    let url = tauri::WebviewUrl::App(url_str.into());
+
+    WebviewWindowBuilder::new(&app, &label, url)
+        .title(format!("File Explorer - {}", folder_name))
+        .inner_size(1200.0, 800.0)
+        .min_inner_size(800.0, 600.0)
+        .build()
+        .map_err(|e| format!("Failed to open new window: {}", e))?;
+
+    Ok(())
+}
+
 #[tauri::command]
 fn search_files(directory: String, query: String, max_results: usize) -> Result<SearchResult, String> {
     let query_lower = query.to_lowercase();
@@ -572,6 +598,7 @@ pub fn run() {
             get_file_info,
             open_file,
             open_in_terminal,
+            open_new_window,
             search_files,
             get_parent_path,
             read_text_file,
