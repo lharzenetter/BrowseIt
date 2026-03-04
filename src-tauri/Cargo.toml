@@ -1,7 +1,7 @@
 [package]
-name = "file-explorer"
+name = "browse-it"
 version = "0.1.0"
-description = "A Windows Explorer-like file manager for macOS"
+description = "BrowseIt - A modern file manager for macOS"
 authors = ["you"]
 license = "MIT"
 repository = ""

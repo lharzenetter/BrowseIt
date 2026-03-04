@@ -1,4 +1,4 @@
-# File Explorer
+# BrowseIt
 
 [![License Badge](https://img.shields.io/badge/License-MIT-brightgreen.svg)](./LICENSE)
 
@@ -69,13 +69,13 @@ Outputs are placed in `src-tauri/target/release/bundle/`:
 
 | Format | Location |
 |---|---|
-| macOS App | `bundle/macos/File Explorer.app` |
-| DMG Installer | `bundle/dmg/File Explorer_0.1.0_aarch64.dmg` |
+| macOS App | `bundle/macos/BrowseIt.app` |
+| DMG Installer | `bundle/dmg/BrowseIt_0.1.0_aarch64.dmg` |
 
 ### Run the built app
 
 ```bash
-open src-tauri/target/release/bundle/macos/File\ Explorer.app
+open src-tauri/target/release/bundle/macos/BrowseIt.app
 ```
 
 Or double-click the `.dmg` to install it like any other macOS application.
@@ -104,7 +104,7 @@ Or double-click the `.dmg` to install it like any other macOS application.
 ## Project Structure
 
 ```
-file-explorer/
+browseit/
   src/                        # React frontend
     components/
       AddressBar.tsx           # Breadcrumb navigation + search

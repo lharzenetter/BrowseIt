@@ -248,6 +248,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "browse-it"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "log",
+ "open",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-log",
+ "tauri-plugin-shell",
+ "trash",
+ "urlencoding",
+ "walkdir",
+ "zip",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -917,28 +939,6 @@ checksum = "38e2275cc4e4fc009b0669731a1e5ab7ebf11f469eaede2bab9309a5b4d6057f"
 dependencies = [
  "memoffset",
  "rustc_version",
-]
-
-[[package]]
-name = "file-explorer"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "log",
- "open",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-log",
- "tauri-plugin-shell",
- "trash",
- "urlencoding",
- "walkdir",
- "zip",
 ]
 
 [[package]]

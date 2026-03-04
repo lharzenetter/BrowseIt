@@ -383,7 +383,7 @@ fn open_new_window(app: tauri::AppHandle, path: String) -> Result<(), String> {
     let url = tauri::WebviewUrl::App(url_str.into());
 
     WebviewWindowBuilder::new(&app, &label, url)
-        .title(format!("File Explorer - {}", folder_name))
+        .title(format!("BrowseIt - {}", folder_name))
         .inner_size(1200.0, 800.0)
         .min_inner_size(800.0, 600.0)
         .build()
@@ -577,7 +577,7 @@ mod dirs {
 /// Returns the config directory path, creating it if needed.
 fn config_dir() -> Result<PathBuf, String> {
     let home = dirs::home_dir().ok_or("No home directory")?;
-    let config_dir = home.join(".config").join("file-explorer");
+    let config_dir = home.join(".config").join("browseit");
     fs::create_dir_all(&config_dir)
         .map_err(|e| format!("Failed to create config directory: {}", e))?;
     Ok(config_dir)
