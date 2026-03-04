@@ -286,16 +286,18 @@ export function useFileExplorer() {
     }
   }, []);
 
-  const addTab = useCallback(() => {
+  const addTab = useCallback(async (targetPath?: string) => {
+    const path = targetPath || currentPath;
     const tabId = generateTabId();
     const newTab: Tab = {
       id: tabId,
-      path: currentPath,
-      label: currentPath.split('/').pop() || '/',
+      path,
+      label: path.split('/').pop() || '/',
     };
     setTabs(prev => [...prev, newTab]);
     setActiveTabId(tabId);
-  }, [currentPath]);
+    await loadDirectory(path);
+  }, [currentPath, loadDirectory]);
 
   const closeTab = useCallback((tabId: string) => {
     setTabs(prev => {

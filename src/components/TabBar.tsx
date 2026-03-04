@@ -17,8 +17,6 @@ export const TabBar = ({
   onCloseTab,
   onAddTab,
 }: TabBarProps) => {
-  if (tabs.length <= 1) return null;
-
   return (
     <div className="tab-bar">
       {tabs.map((tab) => (

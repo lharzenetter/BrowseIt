@@ -130,6 +130,13 @@ function App() {
       case 'open':
         if (contextMenu.target) explorer.openItem(contextMenu.target);
         break;
+      case 'openInNewTab': {
+        const tabPath = contextMenu.target
+          ? (contextMenu.target.is_dir ? contextMenu.target.path : explorer.currentPath)
+          : explorer.currentPath;
+        explorer.addTab(tabPath);
+        break;
+      }
       case 'openInNewWindow': {
         const windowPath = contextMenu.target
           ? (contextMenu.target.is_dir ? contextMenu.target.path : explorer.currentPath)
@@ -334,6 +341,7 @@ function App() {
         state={contextMenu}
         onClose={closeContextMenu}
         onOpen={() => handleContextMenuAction('open')}
+        onOpenInNewTab={() => handleContextMenuAction('openInNewTab')}
         onOpenInNewWindow={() => handleContextMenuAction('openInNewWindow')}
         onCompressToZip={() => handleContextMenuAction('compressToZip')}
         onCopy={() => handleContextMenuAction('copy')}
