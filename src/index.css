@@ -1,54 +1,58 @@
 /* ================================================================
-   File Explorer - Windows Explorer-inspired theme for macOS
+   File Explorer - Windows 11 File Explorer Style
    ================================================================ */
 
 :root {
-  /* Windows 11-inspired color palette */
-  --bg-primary: #f3f3f3;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f9f9f9;
-  --bg-hover: #e8e8e8;
-  --bg-selected: #cce4f7;
-  --bg-selected-unfocused: #d9d9d9;
-  --bg-active: #b4d6f0;
-  --bg-sidebar: #f3f3f3;
-  --bg-toolbar: #f3f3f3;
-  --bg-addressbar: #ffffff;
+  /* Windows 11 Mica / Fluent Design colors */
+  --bg-mica: #f8f8f8;
+  --bg-surface: #ffffff;
+  --bg-layer: #fafafa;
+  --bg-card: #fbfbfb;
+  --bg-subtle: rgba(0, 0, 0, 0.024);
+  --bg-hover: rgba(0, 0, 0, 0.038);
+  --bg-pressed: rgba(0, 0, 0, 0.06);
+  --bg-selected: rgba(0, 103, 192, 0.08);
+  --bg-selected-hover: rgba(0, 103, 192, 0.12);
 
-  --text-primary: #1a1a1a;
-  --text-secondary: #5f5f5f;
-  --text-disabled: #a0a0a0;
+  --text-primary: #1b1b1b;
+  --text-secondary: #616161;
+  --text-tertiary: #8a8a8a;
+  --text-disabled: #adadad;
+  --text-on-accent: #ffffff;
 
-  --border-color: #e0e0e0;
-  --border-focus: #0067c0;
+  --stroke-card: rgba(0, 0, 0, 0.06);
+  --stroke-surface: rgba(0, 0, 0, 0.06);
+  --stroke-divider: rgba(0, 0, 0, 0.08);
+  --stroke-default: rgba(0, 0, 0, 0.1);
+  --stroke-focus: #0067c0;
 
   --accent: #0067c0;
   --accent-hover: #005ba1;
-  --accent-light: #e5f0fa;
+  --accent-light: rgba(0, 103, 192, 0.06);
 
   --danger: #c42b1c;
-  --danger-hover: #a61b0f;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-flyout: 0 8px 32px rgba(0, 0, 0, 0.14);
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-tooltip: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+  --radius-xl: 12px;
 
-  --sidebar-width: 220px;
-  --toolbar-height: 44px;
-  --addressbar-height: 38px;
-  --statusbar-height: 28px;
+  --sidebar-width: 210px;
+  --toolbar-height: 40px;
+  --addressbar-height: 40px;
+  --statusbar-height: 26px;
   --tabbar-height: 34px;
   --preview-width: 280px;
 
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.4;
   color: var(--text-primary);
-  background-color: var(--bg-primary);
+  background-color: var(--bg-mica);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -83,14 +87,13 @@ body {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--bg-mica);
 }
 
 .main-area {
   display: flex;
   flex: 1;
   overflow: hidden;
-  border-top: 1px solid var(--border-color);
 }
 
 .content-area {
@@ -98,7 +101,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
+  border-top-left-radius: var(--radius-lg);
+  margin: 0;
 }
 
 /* ================================================================
@@ -109,9 +114,8 @@ body {
   display: flex;
   align-items: center;
   height: var(--tabbar-height);
-  background: var(--bg-toolbar);
-  border-bottom: 1px solid var(--border-color);
-  padding: 0 4px;
+  background: var(--bg-mica);
+  padding: 4px 8px 0;
   gap: 2px;
 }
 
@@ -119,10 +123,10 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 5px 12px;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   cursor: pointer;
   font-size: 12px;
   color: var(--text-secondary);
@@ -135,10 +139,9 @@ body {
 }
 
 .tab.active {
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   color: var(--text-primary);
-  border-color: var(--border-color);
-  border-bottom-color: var(--bg-secondary);
+  font-weight: 500;
 }
 
 .tab-label {
@@ -151,20 +154,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
   font-size: 10px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 
 .tab-close:hover {
-  background: var(--bg-hover);
+  background: var(--bg-pressed);
   color: var(--text-primary);
 }
 
@@ -172,13 +175,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
   font-size: 16px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 0;
 }
@@ -188,38 +191,39 @@ body {
 }
 
 /* ================================================================
-   Toolbar
+   Toolbar - Windows 11 style command bar
    ================================================================ */
 
 .toolbar {
   display: flex;
   align-items: center;
   height: var(--toolbar-height);
-  padding: 0 8px;
-  background: var(--bg-toolbar);
+  padding: 0 12px;
+  background: var(--bg-mica);
   gap: 2px;
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
+/* "New" button with dropdown chevron */
 .toolbar-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border: 1px solid transparent;
+  gap: 5px;
+  padding: 5px 10px;
+  border: none;
   background: transparent;
   border-radius: var(--radius-sm);
   font-size: 12px;
   color: var(--text-primary);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.1s;
-  height: 30px;
+  transition: background 0.08s;
+  height: 32px;
 }
 
 .toolbar-btn:hover:not(:disabled) {
@@ -227,7 +231,7 @@ body {
 }
 
 .toolbar-btn:active:not(:disabled) {
-  background: var(--bg-active);
+  background: var(--bg-pressed);
 }
 
 .toolbar-btn:disabled {
@@ -235,124 +239,234 @@ body {
   cursor: default;
 }
 
-.toolbar-btn.active {
-  background: var(--bg-selected);
+.toolbar-btn svg {
+  flex-shrink: 0;
 }
 
-.toolbar-btn.danger:hover:not(:disabled) {
-  background: #fde7e7;
+.toolbar-btn-new {
+  padding: 5px 8px 5px 10px;
+}
+
+.toolbar-btn-text span {
+  font-size: 12px;
+}
+
+.chevron-down {
+  margin-left: -1px;
+  opacity: 0.7;
+}
+
+/* Icon-only toolbar buttons (cut/copy/paste/rename/share/delete) */
+.toolbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.08s;
+  padding: 0;
+}
+
+.toolbar-icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.toolbar-icon-btn:active:not(:disabled) {
+  background: var(--bg-pressed);
+}
+
+.toolbar-icon-btn:disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+.toolbar-icon-btn-danger:hover:not(:disabled) {
   color: var(--danger);
 }
 
 .toolbar-separator {
   width: 1px;
-  height: 20px;
-  background: var(--border-color);
+  height: 18px;
+  background: var(--stroke-divider);
   margin: 0 6px;
+  flex-shrink: 0;
 }
 
 .toolbar-spacer {
   flex: 1;
 }
 
-.toolbar-new-wrapper {
+.toolbar-new-wrapper,
+.toolbar-menu-wrapper {
   position: relative;
 }
 
 .toolbar-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  min-width: 180px;
+  background: var(--bg-surface);
+  border: 1px solid var(--stroke-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-flyout);
+  min-width: 200px;
   padding: 4px;
   z-index: 100;
+  backdrop-filter: blur(40px) saturate(150%);
 }
 
 .dropdown-item {
-  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 12px;
+  color: var(--text-primary);
 }
 
 .dropdown-item:hover {
   background: var(--bg-hover);
 }
 
+.dropdown-item-active {
+  background: var(--bg-selected);
+}
+
+.dropdown-item svg {
+  flex-shrink: 0;
+}
+
 .dropdown-input {
   display: flex;
-  gap: 4px;
-  padding: 6px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .dropdown-input input {
   flex: 1;
-  padding: 4px 8px;
-  border: 1px solid var(--border-color);
+  padding: 5px 10px;
+  border: 1px solid var(--stroke-default);
   border-radius: var(--radius-sm);
   font-size: 12px;
+  font-family: inherit;
   outline: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .dropdown-input input:focus {
-  border-color: var(--border-focus);
+  border-color: var(--stroke-focus);
+  box-shadow: 0 0 0 1px var(--stroke-focus);
 }
 
 .dropdown-input button {
-  padding: 4px 10px;
+  padding: 5px 14px;
   background: var(--accent);
-  color: white;
+  color: var(--text-on-accent);
   border: none;
   border-radius: var(--radius-sm);
   font-size: 12px;
+  font-family: inherit;
   cursor: pointer;
 }
 
+.dropdown-input button:hover {
+  background: var(--accent-hover);
+}
+
 /* ================================================================
-   Address Bar
+   Address Bar - Windows 11 style with nav buttons
    ================================================================ */
 
 .address-bar {
   display: flex;
   align-items: center;
   height: var(--addressbar-height);
-  padding: 0 8px;
-  gap: 8px;
-  background: var(--bg-toolbar);
-  border-bottom: 1px solid var(--border-color);
+  padding: 0 10px;
+  gap: 6px;
+  background: var(--bg-mica);
 }
 
-.breadcrumb-container {
-  flex: 1;
-  height: 28px;
+.nav-buttons {
   display: flex;
   align-items: center;
-  background: var(--bg-addressbar);
-  border: 1px solid var(--border-color);
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
   border-radius: var(--radius-sm);
-  padding: 0 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.08s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.nav-btn:active:not(:disabled) {
+  background: var(--bg-pressed);
+}
+
+.nav-btn:disabled {
+  color: var(--text-disabled);
+  cursor: default;
+}
+
+/* Breadcrumb bar */
+.breadcrumb-container {
+  flex: 1;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--radius-md);
+  padding: 0 4px 0 10px;
   overflow: hidden;
+  transition: border-color 0.1s;
+}
+
+.breadcrumb-container:focus-within {
+  border-color: var(--stroke-focus);
+  box-shadow: 0 0 0 1px var(--stroke-focus);
 }
 
 .breadcrumbs {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   cursor: text;
   flex: 1;
   overflow: hidden;
+  height: 100%;
 }
 
 .breadcrumb-item {
-  padding: 2px 4px;
+  padding: 3px 5px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   white-space: nowrap;
   font-size: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
 }
 
 .breadcrumb-item:hover {
@@ -360,8 +474,10 @@ body {
 }
 
 .breadcrumb-sep {
-  color: var(--text-disabled);
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  padding: 0 1px;
+  color: var(--text-tertiary);
 }
 
 .address-input {
@@ -372,32 +488,65 @@ body {
   font-family: inherit;
   background: transparent;
   color: var(--text-primary);
+  height: 100%;
 }
 
+.address-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.address-refresh:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Search bar */
 .search-container {
   position: relative;
-  width: 220px;
+  width: 210px;
+  flex-shrink: 0;
 }
 
 .search-input {
   width: 100%;
-  height: 28px;
-  padding: 0 28px 0 8px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  height: 32px;
+  padding: 0 28px 0 30px;
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-family: inherit;
-  background: var(--bg-addressbar);
+  background: var(--bg-surface);
   color: var(--text-primary);
   outline: none;
+  transition: border-color 0.1s;
 }
 
 .search-input:focus {
-  border-color: var(--border-focus);
+  border-color: var(--stroke-focus);
+  box-shadow: 0 0 0 1px var(--stroke-focus);
 }
 
 .search-input::placeholder {
-  color: var(--text-disabled);
+  color: var(--text-tertiary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .search-clear {
@@ -405,20 +554,29 @@ body {
   right: 4px;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   background: none;
   border: none;
-  font-size: 12px;
-  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 0;
+}
+
+.search-clear:hover {
+  background: var(--bg-hover);
 }
 
 .search-spinner {
   position: absolute;
-  right: 24px;
+  right: 28px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 14px;
+  color: var(--text-tertiary);
   animation: spin 1s linear infinite;
 }
 
@@ -427,61 +585,99 @@ body {
 }
 
 /* ================================================================
-   Sidebar
+   Sidebar - Windows 11 tree-view style
    ================================================================ */
 
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  background: var(--bg-mica);
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 6px 8px;
 }
 
-.sidebar-section {
-  margin-bottom: 8px;
-}
-
-.sidebar-section-title {
-  padding: 4px 16px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.sidebar-item {
+/* Tree-view items */
+.sidebar-tree-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 16px;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 13px;
   color: var(--text-primary);
-  transition: background 0.1s;
+  transition: background 0.06s;
+  user-select: none;
 }
 
-.sidebar-item:hover {
+.sidebar-tree-item:hover {
   background: var(--bg-hover);
 }
 
-.sidebar-item.active {
+.sidebar-tree-item.active {
   background: var(--bg-selected);
+}
+
+.sidebar-tree-item.active:hover {
+  background: var(--bg-selected-hover);
+}
+
+.sidebar-tree-root {
   font-weight: 500;
+  margin-top: 4px;
 }
 
-.sidebar-icon {
-  font-size: 14px;
-  width: 20px;
-  text-align: center;
+.sidebar-tree-root:first-child {
+  margin-top: 0;
 }
 
-.sidebar-label {
+/* Chevron */
+.sidebar-chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+  color: var(--text-tertiary);
+}
+
+.sidebar-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+/* Children container (indented) */
+.sidebar-tree-children {
+  padding-left: 16px;
+}
+
+.sidebar-tree-leaf {
+  padding-left: 26px;
+}
+
+.sidebar-tree-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebar-tree-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 400;
+  font-size: 12.5px;
+}
+
+.sidebar-tree-root .sidebar-tree-label {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.sidebar-pin {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.sidebar-tree-leaf:hover .sidebar-pin {
+  opacity: 1;
 }
 
 /* ================================================================
@@ -498,18 +694,20 @@ body {
 .details-header {
   display: flex;
   align-items: center;
-  height: 30px;
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
+  height: 32px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--stroke-divider);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-secondary);
   user-select: none;
   flex-shrink: 0;
+  padding-right: 8px;
 }
 
 .details-header .details-col {
   cursor: pointer;
+  transition: background 0.06s;
 }
 
 .details-header .details-col:hover {
@@ -536,17 +734,17 @@ body {
 }
 
 .col-modified {
-  width: 180px;
+  width: 170px;
   flex-shrink: 0;
 }
 
 .col-type {
-  width: 140px;
+  width: 130px;
   flex-shrink: 0;
 }
 
 .col-size {
-  width: 100px;
+  width: 90px;
   flex-shrink: 0;
   justify-content: flex-end;
 }
@@ -554,11 +752,12 @@ body {
 .file-row {
   display: flex;
   align-items: center;
-  height: 28px;
+  height: 30px;
   cursor: default;
-  transition: background 0.05s;
-  border-bottom: 1px solid transparent;
+  transition: background 0.04s;
   font-size: 12px;
+  border-radius: var(--radius-sm);
+  margin: 0 4px;
 }
 
 .file-row:hover {
@@ -570,20 +769,20 @@ body {
 }
 
 .file-row.selected:hover {
-  background: var(--bg-active);
+  background: var(--bg-selected-hover);
 }
 
 .file-row.drag-over {
   background: var(--accent-light);
-  border-bottom-color: var(--accent);
+  outline: 1.5px dashed var(--accent);
 }
 
 .file-row.hidden-file {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .file-icon {
-  font-size: 14px;
+  font-size: 15px;
   margin-right: 6px;
   flex-shrink: 0;
 }
@@ -597,7 +796,7 @@ body {
 .symlink-badge {
   font-size: 10px;
   margin-left: 4px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 /* ================================================================
@@ -618,11 +817,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90px;
-  padding: 8px 4px;
+  width: 96px;
+  padding: 10px 6px 6px;
   border-radius: var(--radius-md);
   cursor: default;
-  transition: background 0.1s;
+  transition: background 0.06s;
 }
 
 .file-grid-item:hover {
@@ -635,14 +834,15 @@ body {
 
 .file-grid-item.drag-over {
   background: var(--accent-light);
+  outline: 1.5px dashed var(--accent);
 }
 
 .file-grid-item.hidden-file {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .grid-icon {
-  font-size: 36px;
+  font-size: 40px;
   margin-bottom: 4px;
 }
 
@@ -656,6 +856,7 @@ body {
   -webkit-box-orient: vertical;
   word-break: break-word;
   max-width: 100%;
+  color: var(--text-primary);
 }
 
 /* ================================================================
@@ -672,7 +873,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-sm);
   cursor: default;
   font-size: 12px;
@@ -691,11 +892,11 @@ body {
 }
 
 .file-list-item.hidden-file {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .list-icon {
-  font-size: 14px;
+  font-size: 15px;
   flex-shrink: 0;
 }
 
@@ -715,12 +916,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-size: 14px;
-}
-
-.spinner {
-  animation: spin 1s linear infinite;
 }
 
 .empty-message {
@@ -732,43 +929,46 @@ body {
    ================================================================ */
 
 .rename-input {
-  border: 1px solid var(--border-focus);
+  border: 1px solid var(--stroke-focus);
   border-radius: var(--radius-sm);
-  padding: 1px 4px;
+  padding: 2px 6px;
   font-size: 12px;
   font-family: inherit;
   outline: none;
-  background: var(--bg-secondary);
+  background: var(--bg-surface);
   color: var(--text-primary);
   min-width: 80px;
   max-width: 300px;
+  box-shadow: 0 0 0 1px var(--stroke-focus);
 }
 
 /* ================================================================
-   Context Menu
+   Context Menu - Windows 11 Acrylic style
    ================================================================ */
 
 .context-menu {
   position: fixed;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: rgba(252, 252, 252, 0.92);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--stroke-surface);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  min-width: 200px;
+  box-shadow: var(--shadow-flyout);
+  min-width: 240px;
   padding: 4px;
   z-index: 1000;
-  backdrop-filter: blur(20px);
 }
 
 .context-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 10px;
+  padding: 7px 12px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 12px;
   color: var(--text-primary);
+  transition: background 0.04s;
 }
 
 .context-menu-item:hover {
@@ -776,14 +976,70 @@ body {
 }
 
 .context-menu-item.danger:hover {
-  background: #fde7e7;
+  background: rgba(196, 43, 28, 0.08);
   color: var(--danger);
+}
+
+.context-menu-item svg {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.ctx-label {
+  flex: 1;
+}
+
+.ctx-label-bold {
+  font-weight: 600;
+}
+
+.ctx-shortcut {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-left: auto;
 }
 
 .context-menu-separator {
   height: 1px;
-  background: var(--border-color);
-  margin: 4px 8px;
+  background: var(--stroke-divider);
+  margin: 4px 10px;
+}
+
+/* Icon action bar at bottom of context menu (Win11 style) */
+.ctx-icon-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.ctx-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.06s;
+}
+
+.ctx-icon-btn:hover {
+  background: var(--bg-hover);
+}
+
+.ctx-icon-btn:active {
+  background: var(--bg-pressed);
+}
+
+.ctx-icon-btn-danger:hover {
+  color: var(--danger);
+  background: rgba(196, 43, 28, 0.08);
 }
 
 /* ================================================================
@@ -793,8 +1049,8 @@ body {
 .preview-panel {
   width: var(--preview-width);
   min-width: var(--preview-width);
-  border-left: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
+  border-left: 1px solid var(--stroke-divider);
+  background: var(--bg-layer);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -804,8 +1060,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--stroke-divider);
   font-weight: 500;
   font-size: 12px;
 }
@@ -814,46 +1070,47 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   cursor: pointer;
   padding: 0;
 }
 
 .preview-close:hover {
   background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .preview-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 20px 16px;
 }
 
 .preview-icon-large {
-  font-size: 48px;
+  font-size: 52px;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .preview-filename {
   font-size: 14px;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   word-break: break-word;
 }
 
 .preview-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
 .preview-info-row {
@@ -875,11 +1132,11 @@ body {
 
 .preview-path {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
 .preview-image {
-  margin-top: 12px;
+  margin-top: 14px;
   text-align: center;
 }
 
@@ -887,22 +1144,22 @@ body {
   max-width: 100%;
   max-height: 200px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--stroke-card);
 }
 
 .preview-text {
-  margin-top: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  margin-top: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--stroke-card);
   border-radius: var(--radius-md);
-  padding: 8px;
+  padding: 10px;
   max-height: 300px;
   overflow: auto;
 }
 
 .preview-text pre {
   font-size: 11px;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: 'Cascadia Code', 'SF Mono', 'Fira Code', monospace;
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--text-primary);
@@ -910,9 +1167,9 @@ body {
 }
 
 .preview-loading {
-  margin-top: 12px;
+  margin-top: 14px;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
@@ -924,9 +1181,9 @@ body {
   display: flex;
   align-items: center;
   height: var(--statusbar-height);
-  padding: 0 12px;
-  background: var(--bg-toolbar);
-  border-top: 1px solid var(--border-color);
+  padding: 0 14px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--stroke-divider);
   font-size: 11px;
   color: var(--text-secondary);
   gap: 16px;
@@ -962,11 +1219,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  background: #fde7e7;
+  padding: 6px 14px;
+  background: rgba(196, 43, 28, 0.06);
   color: var(--danger);
   font-size: 12px;
-  border-bottom: 1px solid #f5c6c6;
+  border-bottom: 1px solid rgba(196, 43, 28, 0.12);
 }
 
 .error-bar button {
@@ -979,7 +1236,7 @@ body {
 }
 
 /* ================================================================
-   Modal
+   Modal - Windows 11 Content Dialog style
    ================================================================ */
 
 .modal-overlay {
@@ -990,15 +1247,16 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 24px;
-  min-width: 340px;
+  background: var(--bg-surface);
+  border: 1px solid var(--stroke-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-flyout);
+  padding: 28px 24px;
+  min-width: 360px;
   max-width: 500px;
 }
 
@@ -1011,32 +1269,34 @@ body {
 .modal-input {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--stroke-default);
   border-radius: var(--radius-md);
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  background: var(--bg-tertiary);
+  background: var(--bg-layer);
   color: var(--text-primary);
+  transition: border-color 0.1s;
 }
 
 .modal-input:focus {
-  border-color: var(--border-focus);
+  border-color: var(--stroke-focus);
+  box-shadow: 0 0 0 1px var(--stroke-focus);
 }
 
 .modal-hint {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 11px;
-  color: var(--text-disabled);
+  color: var(--text-tertiary);
 }
 
 /* ================================================================
-   Scrollbar Styling
+   Scrollbar Styling - Windows 11 thin scrollbar
    ================================================================ */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1044,12 +1304,27 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Auto-hide scrollbar on non-hover */
+.sidebar::-webkit-scrollbar-thumb,
+.details-body::-webkit-scrollbar-thumb,
+.file-grid::-webkit-scrollbar-thumb,
+.file-list-view::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.sidebar:hover::-webkit-scrollbar-thumb,
+.details-body:hover::-webkit-scrollbar-thumb,
+.file-grid:hover::-webkit-scrollbar-thumb,
+.file-list-view:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 /* ================================================================

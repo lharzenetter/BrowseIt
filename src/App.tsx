@@ -205,6 +205,12 @@ function App() {
         searchQuery={explorer.searchQuery}
         onSearch={explorer.search}
         isSearching={explorer.isSearching}
+        canGoBack={explorer.historyIndex > 0}
+        canGoForward={explorer.historyIndex < explorer.history.length - 1}
+        onGoBack={explorer.goBack}
+        onGoForward={explorer.goForward}
+        onGoUp={explorer.goUp}
+        onRefresh={explorer.refresh}
       />
       <div className="main-area">
         <Sidebar
