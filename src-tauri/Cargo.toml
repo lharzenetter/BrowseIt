@@ -31,3 +31,4 @@ trash = "5"
 open = "5"
 urlencoding = "2"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+shell-words = "1"

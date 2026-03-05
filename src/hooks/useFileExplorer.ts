@@ -32,7 +32,7 @@ export function useFileExplorer() {
   const [quickAccessPaths, setQuickAccessPaths] = useState<[string, string][]>([]);
   const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
   const [volumes, setVolumes] = useState<{ name: string; mount_point: string }[]>([]);
-  const [settings, setSettingsState] = useState<AppSettings>({ terminal: 'Terminal' });
+  const [settings, setSettingsState] = useState<AppSettings>({ terminal: 'Terminal', custom_context_actions: [] });
 
   // Initialize
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { ContextMenuState } from '../types';
+import type { ContextMenuState, CustomContextAction } from '../types';
 
 interface ContextMenuProps {
   state: ContextMenuState;
@@ -22,6 +22,8 @@ interface ContextMenuProps {
   isPinned: boolean;
   hasClipboard: boolean;
   selectionCount: number;
+  customActions: CustomContextAction[];
+  onCustomAction: (action: CustomContextAction) => void;
 }
 
 export const ContextMenu = ({
@@ -44,6 +46,8 @@ export const ContextMenu = ({
   onPinQuickAccess,
   onUnpinQuickAccess,
   isPinned,
+  customActions,
+  onCustomAction,
 }: ContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -175,6 +179,29 @@ export const ContextMenu = ({
             </svg>
             <span className="ctx-label">Open in Terminal</span>
           </div>
+
+          {/* Custom context menu actions */}
+          {customActions
+            .filter((action) => {
+              if (!state.target) return false;
+              if (action.applies_to === 'both') return true;
+              if (action.applies_to === 'directories') return state.target.is_dir;
+              if (action.applies_to === 'files') return !state.target.is_dir;
+              return true;
+            })
+            .map((action) => (
+              <div
+                key={action.id}
+                className="context-menu-item"
+                onClick={() => onCustomAction(action)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1"/>
+                  <path d="M5.5 5.5l5 2.5-5 2.5V5.5z" fill="currentColor"/>
+                </svg>
+                <span className="ctx-label">{action.label}</span>
+              </div>
+            ))}
 
           <div className="context-menu-separator" />
 

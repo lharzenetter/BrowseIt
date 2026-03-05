@@ -1392,7 +1392,9 @@ body {
    ================================================================ */
 
 .settings-modal {
-  min-width: 400px;
+  min-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .settings-section {
@@ -1500,6 +1502,205 @@ body {
 
 .settings-btn:hover {
   background: var(--bg-hover);
+}
+
+.settings-btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.settings-btn-primary:hover {
+  opacity: 0.9;
+  background: var(--accent);
+}
+
+.settings-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Custom Context Menu Actions in Settings */
+.settings-custom-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.settings-custom-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-layer);
+}
+
+.settings-custom-action-item:hover {
+  background: var(--bg-hover);
+}
+
+.settings-custom-action-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.settings-custom-action-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-custom-action-detail {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settings-custom-action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.settings-custom-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.settings-custom-action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--stroke-default);
+  color: var(--text-primary);
+}
+
+.settings-custom-action-btn.danger:hover {
+  color: #e74c3c;
+  border-color: #e74c3c33;
+  background: #e74c3c11;
+}
+
+.settings-custom-actions-empty {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 12px;
+  text-align: center;
+  border: 1px dashed var(--stroke-card);
+  border-radius: var(--radius-md);
+}
+
+.settings-add-action-btn {
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;
+  color: var(--accent);
+  border-style: dashed;
+}
+
+.settings-custom-action-form {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  background: var(--bg-layer);
+}
+
+.settings-custom-action-form-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.settings-form-row {
+  margin-bottom: 10px;
+}
+
+.settings-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.settings-form-input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--stroke-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.1s;
+}
+
+.settings-form-input:focus {
+  border-color: var(--accent);
+}
+
+.settings-form-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+.settings-applies-to-options {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-applies-to-option {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.settings-applies-to-option:hover {
+  background: var(--bg-hover);
+  border-color: var(--stroke-default);
+}
+
+.settings-applies-to-option.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.settings-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 

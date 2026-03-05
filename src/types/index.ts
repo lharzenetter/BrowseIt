@@ -45,6 +45,17 @@ export interface ContextMenuState {
   target: FileEntry | null;
 }
 
+export type CustomActionTarget = 'files' | 'directories' | 'both';
+
+export interface CustomContextAction {
+  id: string;
+  label: string;
+  command: string;
+  args: string;
+  applies_to: CustomActionTarget;
+}
+
 export interface AppSettings {
   terminal: string;
+  custom_context_actions: CustomContextAction[];
 }

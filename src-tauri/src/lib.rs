@@ -99,7 +99,8 @@ fn list_directory(path: String, show_hidden: bool) -> Result<Vec<FileEntry>, Str
 
     let mut entries: Vec<FileEntry> = Vec::new();
 
-    let read_dir = fs::read_dir(dir_path).map_err(|e| format!("Failed to read directory: {}", e))?;
+    let read_dir =
+        fs::read_dir(dir_path).map_err(|e| format!("Failed to read directory: {}", e))?;
 
     for entry in read_dir {
         if let Ok(entry) = entry {
@@ -164,10 +165,7 @@ fn get_volumes() -> Result<Vec<DiskInfo>, String> {
     if let Ok(entries) = fs::read_dir("/Volumes") {
         for entry in entries.flatten() {
             let path = entry.path();
-            let name = entry
-                .file_name()
-                .to_string_lossy()
-                .to_string();
+            let name = entry.file_name().to_string_lossy().to_string();
             disks.push(DiskInfo {
                 name,
                 mount_point: path.to_string_lossy().to_string(),
@@ -178,12 +176,15 @@ fn get_volumes() -> Result<Vec<DiskInfo>, String> {
     }
 
     // Always include root
-    disks.insert(0, DiskInfo {
-        name: "Macintosh HD".to_string(),
-        mount_point: "/".to_string(),
-        total_space: 0,
-        available_space: 0,
-    });
+    disks.insert(
+        0,
+        DiskInfo {
+            name: "Macintosh HD".to_string(),
+            mount_point: "/".to_string(),
+            total_space: 0,
+            available_space: 0,
+        },
+    );
 
     Ok(disks)
 }
@@ -197,7 +198,8 @@ fn create_directory(path: String) -> Result<(), String> {
 fn create_file(path: String) -> Result<(), String> {
     // Create parent directories if they don't exist
     if let Some(parent) = Path::new(&path).parent() {
-        fs::create_dir_all(parent).map_err(|e| format!("Failed to create parent directories: {}", e))?;
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create parent directories: {}", e))?;
     }
     fs::File::create(&path).map_err(|e| format!("Failed to create file: {}", e))?;
     Ok(())
@@ -234,16 +236,13 @@ fn copy_items(sources: Vec<String>, destination: String) -> Result<(), String> {
 
     for source in sources {
         let src_path = Path::new(&source);
-        let file_name = src_path
-            .file_name()
-            .ok_or("Invalid source path")?;
+        let file_name = src_path.file_name().ok_or("Invalid source path")?;
         let target = dest_path.join(file_name);
 
         if src_path.is_dir() {
             copy_dir_recursive(src_path, &target)?;
         } else {
-            fs::copy(src_path, &target)
-                .map_err(|e| format!("Failed to copy file: {}", e))?;
+            fs::copy(src_path, &target).map_err(|e| format!("Failed to copy file: {}", e))?;
         }
     }
     Ok(())
@@ -262,8 +261,7 @@ fn copy_dir_recursive(src: &Path, dest: &Path) -> Result<(), String> {
         if src_path.is_dir() {
             copy_dir_recursive(&src_path, &dest_path)?;
         } else {
-            fs::copy(&src_path, &dest_path)
-                .map_err(|e| format!("Failed to copy file: {}", e))?;
+            fs::copy(&src_path, &dest_path).map_err(|e| format!("Failed to copy file: {}", e))?;
         }
     }
     Ok(())
@@ -278,9 +276,7 @@ fn move_items(sources: Vec<String>, destination: String) -> Result<(), String> {
 
     for source in sources {
         let src_path = Path::new(&source);
-        let file_name = src_path
-            .file_name()
-            .ok_or("Invalid source path")?;
+        let file_name = src_path.file_name().ok_or("Invalid source path")?;
         let target = dest_path.join(file_name);
 
         // Try rename first (fast, same filesystem)
@@ -291,8 +287,7 @@ fn move_items(sources: Vec<String>, destination: String) -> Result<(), String> {
                 fs::remove_dir_all(src_path)
                     .map_err(|e| format!("Failed to remove original directory: {}", e))?;
             } else {
-                fs::copy(src_path, &target)
-                    .map_err(|e| format!("Failed to copy file: {}", e))?;
+                fs::copy(src_path, &target).map_err(|e| format!("Failed to copy file: {}", e))?;
                 fs::remove_file(src_path)
                     .map_err(|e| format!("Failed to remove original file: {}", e))?;
             }
@@ -367,6 +362,71 @@ fn open_in_terminal(path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn run_custom_context_action(command: String, args: String, path: String) -> Result<(), String> {
+    // Determine the directory: if path is a file, use its parent
+    let target_path = Path::new(&path);
+    let dir = if target_path.is_dir() {
+        path.clone()
+    } else {
+        target_path
+            .parent()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or(path.clone())
+    };
+
+    // Replace placeholders in the args template
+    let resolved_args = args.replace("{path}", &path).replace("{dir}", &dir);
+
+    // On macOS, if the command looks like an app name (no path separator),
+    // use `open -a <app> <args>` for .app bundles
+    #[cfg(target_os = "macos")]
+    {
+        if !command.contains('/') {
+            // Use `open -a <AppName>` which handles .app bundles
+            let mut cmd = std::process::Command::new("open");
+            cmd.arg("-a").arg(&command);
+            if !resolved_args.is_empty() {
+                // Split the resolved args by whitespace for individual arguments
+                for arg in shell_words::split(&resolved_args)
+                    .unwrap_or_else(|_| vec![resolved_args.clone()])
+                {
+                    cmd.arg(arg);
+                }
+            }
+            cmd.spawn()
+                .map_err(|e| format!("Failed to open '{}': {}", command, e))?;
+        } else {
+            let mut cmd = std::process::Command::new(&command);
+            if !resolved_args.is_empty() {
+                for arg in shell_words::split(&resolved_args)
+                    .unwrap_or_else(|_| vec![resolved_args.clone()])
+                {
+                    cmd.arg(arg);
+                }
+            }
+            cmd.spawn()
+                .map_err(|e| format!("Failed to run '{}': {}", command, e))?;
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let mut cmd = std::process::Command::new(&command);
+        if !resolved_args.is_empty() {
+            for arg in
+                shell_words::split(&resolved_args).unwrap_or_else(|_| vec![resolved_args.clone()])
+            {
+                cmd.arg(arg);
+            }
+        }
+        cmd.spawn()
+            .map_err(|e| format!("Failed to run '{}': {}", command, e))?;
+    }
+
+    Ok(())
+}
+
 static WINDOW_COUNTER: AtomicU32 = AtomicU32::new(1);
 
 #[tauri::command]
@@ -429,8 +489,8 @@ fn compress_to_zip(paths: Vec<String>) -> Result<String, String> {
         counter += 1;
     }
 
-    let file = fs::File::create(&zip_path)
-        .map_err(|e| format!("Failed to create zip file: {}", e))?;
+    let file =
+        fs::File::create(&zip_path).map_err(|e| format!("Failed to create zip file: {}", e))?;
     let mut zip_writer = zip::ZipWriter::new(file);
     let options = zip::write::SimpleFileOptions::default()
         .compression_method(zip::CompressionMethod::Deflated);
@@ -447,8 +507,7 @@ fn compress_to_zip(paths: Vec<String>) -> Result<String, String> {
             zip_writer
                 .start_file(&file_name, options)
                 .map_err(|e| format!("Failed to add file to zip: {}", e))?;
-            let content = fs::read(src_path)
-                .map_err(|e| format!("Failed to read file: {}", e))?;
+            let content = fs::read(src_path).map_err(|e| format!("Failed to read file: {}", e))?;
             std::io::Write::write_all(&mut zip_writer, &content)
                 .map_err(|e| format!("Failed to write to zip: {}", e))?;
         }
@@ -494,8 +553,7 @@ fn add_dir_to_zip(
             zip_writer
                 .start_file(&name, options)
                 .map_err(|e| format!("Failed to add file to zip: {}", e))?;
-            let content = fs::read(path)
-                .map_err(|e| format!("Failed to read file: {}", e))?;
+            let content = fs::read(path).map_err(|e| format!("Failed to read file: {}", e))?;
             std::io::Write::write_all(zip_writer, &content)
                 .map_err(|e| format!("Failed to write to zip: {}", e))?;
         }
@@ -504,7 +562,11 @@ fn add_dir_to_zip(
 }
 
 #[tauri::command]
-fn search_files(directory: String, query: String, max_results: usize) -> Result<SearchResult, String> {
+fn search_files(
+    directory: String,
+    query: String,
+    max_results: usize,
+) -> Result<SearchResult, String> {
     let query_lower = query.to_lowercase();
     let mut entries = Vec::new();
     let mut total = 0;
@@ -516,10 +578,7 @@ fn search_files(directory: String, query: String, max_results: usize) -> Result<
         .filter_map(|e| e.ok());
 
     for entry in walker {
-        let file_name = entry
-            .file_name()
-            .to_string_lossy()
-            .to_lowercase();
+        let file_name = entry.file_name().to_string_lossy().to_lowercase();
 
         if file_name.contains(&query_lower) {
             total += 1;
@@ -604,7 +663,10 @@ fn get_pinned_quick_access() -> Result<Vec<String>, String> {
     let paths: Vec<String> = serde_json::from_str(&content)
         .map_err(|e| format!("Failed to parse quick access config: {}", e))?;
     // Filter out paths that no longer exist
-    Ok(paths.into_iter().filter(|p| Path::new(p).exists()).collect())
+    Ok(paths
+        .into_iter()
+        .filter(|p| Path::new(p).exists())
+        .collect())
 }
 
 #[tauri::command]
@@ -642,14 +704,26 @@ fn save_pinned_quick_access(paths: &[String]) -> Result<(), String> {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CustomContextAction {
+    pub id: String,
+    pub label: String,
+    pub command: String,
+    pub args: String,
+    pub applies_to: String, // "files", "directories", or "both"
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppSettings {
     pub terminal: String,
+    #[serde(default)]
+    pub custom_context_actions: Vec<CustomContextAction>,
 }
 
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
             terminal: "Terminal".to_string(),
+            custom_context_actions: Vec::new(),
         }
     }
 }
@@ -660,10 +734,10 @@ fn get_settings() -> Result<AppSettings, String> {
     if !config_path.exists() {
         return Ok(AppSettings::default());
     }
-    let content = fs::read_to_string(&config_path)
-        .map_err(|e| format!("Failed to read settings: {}", e))?;
-    let settings: AppSettings = serde_json::from_str(&content)
-        .map_err(|e| format!("Failed to parse settings: {}", e))?;
+    let content =
+        fs::read_to_string(&config_path).map_err(|e| format!("Failed to read settings: {}", e))?;
+    let settings: AppSettings =
+        serde_json::from_str(&content).map_err(|e| format!("Failed to parse settings: {}", e))?;
     Ok(settings)
 }
 
@@ -672,8 +746,7 @@ fn save_settings(settings: AppSettings) -> Result<(), String> {
     let config_path = settings_config_path()?;
     let content = serde_json::to_string_pretty(&settings)
         .map_err(|e| format!("Failed to serialize settings: {}", e))?;
-    fs::write(&config_path, content)
-        .map_err(|e| format!("Failed to write settings: {}", e))
+    fs::write(&config_path, content).map_err(|e| format!("Failed to write settings: {}", e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -718,6 +791,7 @@ pub fn run() {
             remove_pinned_quick_access,
             get_settings,
             save_settings,
+            run_custom_context_action,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
