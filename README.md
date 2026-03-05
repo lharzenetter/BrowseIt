@@ -15,7 +15,7 @@ Completely built by AI.
 - **Tabs** -- open multiple directories in the same window
 - **Search** -- recursive file name search up to 5 levels deep
 - **Preview panel** -- file metadata and text file preview
-- **Context menu** -- right-click for all operations
+- **Context menu** -- right-click for all operations, with support for custom actions (e.g. open in VS Code, IntelliJ) configurable via Settings
 - **Drag and drop** -- move files between folders
 - **Keyboard shortcuts** -- full keyboard-driven workflow
 - **Hidden files toggle** -- show/hide dotfiles
