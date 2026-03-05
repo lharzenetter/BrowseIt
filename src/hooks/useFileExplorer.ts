@@ -32,7 +32,7 @@ export function useFileExplorer() {
   const [quickAccessPaths, setQuickAccessPaths] = useState<[string, string][]>([]);
   const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
   const [volumes, setVolumes] = useState<{ name: string; mount_point: string }[]>([]);
-  const [settings, setSettingsState] = useState<AppSettings>({ terminal: 'Terminal', custom_context_actions: [] });
+  const [settings, setSettingsState] = useState<AppSettings>({ terminal: 'Terminal', custom_context_actions: [], show_hidden: false, hidden_home_paths: [] });
 
   // Initialize
   useEffect(() => {
@@ -47,6 +47,7 @@ export function useFileExplorer() {
         setVolumes(vols);
         setPinnedPaths(pinned);
         setSettingsState(appSettings);
+        setShowHidden(appSettings.show_hidden ?? false);
 
         // Check if a path was passed via query param (new window)
         const params = new URLSearchParams(window.location.search);
@@ -58,7 +59,7 @@ export function useFileExplorer() {
         const tabId = generateTabId();
         setTabs([{ id: tabId, path: initialPath, label: initialLabel }]);
         setActiveTabId(tabId);
-        await navigateTo(initialPath, true);
+        await navigateTo(initialPath, true, appSettings.show_hidden ?? false);
       } catch (e) {
         setError(String(e));
       }
@@ -66,7 +67,7 @@ export function useFileExplorer() {
     init();
   }, []);
 
-  const loadDirectory = useCallback(async (path: string) => {
+  const loadDirectory = useCallback(async (path: string, overrideShowHidden?: boolean) => {
     setLoading(true);
     setError(null);
     setSearchResults(null);
@@ -74,7 +75,7 @@ export function useFileExplorer() {
     try {
       const result = await invoke<FileEntry[]>('list_directory', {
         path,
-        showHidden,
+        showHidden: overrideShowHidden ?? showHidden,
       });
       setEntries(result);
       setCurrentPath(path);
@@ -87,8 +88,8 @@ export function useFileExplorer() {
     }
   }, [showHidden]);
 
-  const navigateTo = useCallback(async (path: string, replace = false) => {
-    await loadDirectory(path);
+  const navigateTo = useCallback(async (path: string, replace = false, overrideShowHidden?: boolean) => {
+    await loadDirectory(path, overrideShowHidden);
     setHistory(prev => {
       if (replace) {
         return [path];
@@ -376,6 +377,17 @@ export function useFileExplorer() {
     }
   }, [sortField]);
 
+  const updateShowHidden = useCallback(async (value: boolean) => {
+    setShowHidden(value);
+    try {
+      const newSettings = { ...settings, show_hidden: value };
+      await invoke('save_settings', { settings: newSettings });
+      setSettingsState(newSettings);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, [settings]);
+
   // Reload when showHidden changes
   useEffect(() => {
     if (currentPath) {
@@ -390,7 +402,7 @@ export function useFileExplorer() {
     error,
     setError,
     showHidden,
-    setShowHidden,
+    setShowHidden: updateShowHidden,
     selectedPaths,
     clipboard,
     sortField,

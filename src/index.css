@@ -1703,4 +1703,79 @@ body {
   margin-top: 12px;
 }
 
+/* Home Sidebar Items Settings */
+.settings-home-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-home-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-layer);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.settings-home-item:hover {
+  background: var(--bg-hover);
+}
+
+.settings-home-item.disabled {
+  opacity: 0.5;
+}
+
+.settings-home-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-home-item-path {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.settings-home-item-toggle {
+  flex-shrink: 0;
+}
+
+.toggle-track {
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--text-tertiary);
+  position: relative;
+  transition: background 0.15s;
+}
+
+.settings-home-item-toggle.active .toggle-track {
+  background: var(--accent);
+}
+
+.toggle-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.15s;
+}
+
+.settings-home-item-toggle.active .toggle-thumb {
+  transform: translateX(16px);
+}
+
 

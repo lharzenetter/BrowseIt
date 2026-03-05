@@ -139,6 +139,7 @@ fn get_quick_access_paths() -> Result<Vec<(String, String)>, String> {
     let mut paths = Vec::new();
 
     let known_dirs = vec![
+        ("Home", home.clone()),
         ("Desktop", home.join("Desktop")),
         ("Documents", home.join("Documents")),
         ("Downloads", home.join("Downloads")),
@@ -717,6 +718,10 @@ pub struct AppSettings {
     pub terminal: String,
     #[serde(default)]
     pub custom_context_actions: Vec<CustomContextAction>,
+    #[serde(default)]
+    pub show_hidden: bool,
+    #[serde(default)]
+    pub hidden_home_paths: Vec<String>,
 }
 
 impl Default for AppSettings {
@@ -724,6 +729,8 @@ impl Default for AppSettings {
         Self {
             terminal: "Terminal".to_string(),
             custom_context_actions: Vec::new(),
+            show_hidden: false,
+            hidden_home_paths: Vec::new(),
         }
     }
 }

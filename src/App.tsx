@@ -295,6 +295,7 @@ function App() {
           currentPath={explorer.currentPath}
           onNavigate={(path) => explorer.navigateTo(path)}
           onUnpin={(path) => explorer.unpinQuickAccess(path)}
+          hiddenHomePaths={explorer.settings.hidden_home_paths ?? []}
         />
         <div className="content-area">
           {explorer.error && (
@@ -605,6 +606,40 @@ function App() {
                   + Add Action
                 </button>
               )}
+            </div>
+
+            {/* Home Sidebar Items */}
+            <div className="settings-section">
+              <label className="settings-label">Home Sidebar Items</label>
+              <div className="settings-home-items-list">
+                {explorer.quickAccessPaths.map(([name, path]) => {
+                  const isHidden = (explorer.settings.hidden_home_paths ?? []).includes(path);
+                  return (
+                    <div
+                      key={path}
+                      className={`settings-home-item${isHidden ? ' disabled' : ''}`}
+                      onClick={() => {
+                        const current = explorer.settings.hidden_home_paths ?? [];
+                        const updated = isHidden
+                          ? current.filter((p) => p !== path)
+                          : [...current, path];
+                        explorer.saveSettings({
+                          ...explorer.settings,
+                          hidden_home_paths: updated,
+                        });
+                      }}
+                    >
+                      <div className={`settings-home-item-toggle${isHidden ? '' : ' active'}`}>
+                        <div className="toggle-track">
+                          <div className="toggle-thumb" />
+                        </div>
+                      </div>
+                      <span className="settings-home-item-name">{name}</span>
+                      <span className="settings-home-item-path">{path}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="settings-actions">

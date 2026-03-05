@@ -58,4 +58,6 @@ export interface CustomContextAction {
 export interface AppSettings {
   terminal: string;
   custom_context_actions: CustomContextAction[];
+  show_hidden: boolean;
+  hidden_home_paths: string[];
 }

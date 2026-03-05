@@ -7,6 +7,7 @@ interface SidebarProps {
   currentPath: string;
   onNavigate: (path: string) => void;
   onUnpin: (path: string) => void;
+  hiddenHomePaths: string[];
 }
 
 export const Sidebar = ({
@@ -16,6 +17,7 @@ export const Sidebar = ({
   currentPath,
   onNavigate,
   onUnpin,
+  hiddenHomePaths,
 }: SidebarProps) => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     quickaccess: true,
@@ -29,6 +31,12 @@ export const Sidebar = ({
   };
 
   const sidebarIcons: Record<string, ReactNode> = {
+    Home: (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8l5-4.5L13 8" stroke="#0067c0" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M4.5 7v5.5h3V10h1v2.5h3V7" stroke="#0067c0" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
     Desktop: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <rect x="2" y="2" width="12" height="9" rx="1.5" stroke="#0067c0" strokeWidth="1.2"/>
@@ -173,7 +181,9 @@ export const Sidebar = ({
       </div>
       {expandedSections.home !== false && (
         <div className="sidebar-tree-children">
-          {quickAccessPaths.map(([name, path]) => (
+          {quickAccessPaths
+            .filter(([, path]) => !(hiddenHomePaths ?? []).includes(path))
+            .map(([name, path]) => (
             <div
               key={path}
               className={`sidebar-tree-item sidebar-tree-leaf ${currentPath === path ? 'active' : ''}`}
