@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FilesystemProvider } from '../filesystem/FilesystemProvider';
 import type { FileEntry, Tab, ClipboardData, SortField, SortDirection, ViewMode, AppSettings } from '../types';
 
@@ -330,7 +330,10 @@ export function useFileExplorer(fs: FilesystemProvider) {
     setSelectedPaths(new Set());
   }, []);
 
-  const sortedEntries = useCallback((): FileEntry[] => {
+  // useMemo instead of useCallback: the sort result is a value, not a function.
+  // This means the sort only runs when entries/sort actually change, not on every
+  // render of every component that calls useFileExplorer().
+  const sortedEntries = useMemo((): FileEntry[] => {
     const source = searchResults ?? entries;
     const sorted = [...source].sort((a, b) => {
       // Always keep directories first
@@ -386,7 +389,7 @@ export function useFileExplorer(fs: FilesystemProvider) {
 
   return {
     currentPath,
-    entries: sortedEntries(),
+    entries: sortedEntries,
     loading,
     error,
     setError,
