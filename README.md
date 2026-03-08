@@ -28,14 +28,13 @@ Completely built by AI.
 
 ## Getting Started
 
-Required develepment tools:
+Required development tools:
 
 ```bash
 # Optional, if you have Rust already installed
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-echo "
-source $HOME/.cargo/env" > $HOME/.zshrc
+echo "source $HOME/.cargo/env" >> $HOME/.zshrc
 
 source $HOME/.cargo/env
 ```
