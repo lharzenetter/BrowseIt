@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import { useFileExplorer } from './hooks/useFileExplorer';
+import type { FilesystemProvider } from './filesystem/FilesystemProvider';
 import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { AddressBar } from './components/AddressBar';
@@ -9,10 +9,14 @@ import { FileList } from './components/FileList';
 import { ContextMenu } from './components/ContextMenu';
 import { PreviewPanel } from './components/PreviewPanel';
 import { StatusBar } from './components/StatusBar';
-import type { ContextMenuState, CustomContextAction, FileEntry } from './types';
+import type { ContextMenuState, CustomContextAction } from './types';
 
-function App() {
-  const explorer = useFileExplorer();
+interface AppProps {
+  fs: FilesystemProvider;
+}
+
+function App({ fs }: AppProps) {
+  const explorer = useFileExplorer(fs);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,
@@ -148,7 +152,7 @@ function App() {
         const windowPath = contextMenu.target
           ? (contextMenu.target.is_dir ? contextMenu.target.path : explorer.currentPath)
           : explorer.currentPath;
-        invoke('open_new_window', { path: windowPath }).catch((e) =>
+        fs.openNewWindow(windowPath).catch((e: unknown) =>
           explorer.setError(String(e))
         );
         break;
@@ -160,9 +164,9 @@ function App() {
               : [contextMenu.target.path])
           : [];
         if (zipPaths.length > 0) {
-          invoke('compress_to_zip', { paths: zipPaths })
+          fs.compressToZip(zipPaths)
             .then(() => explorer.refresh())
-            .catch((e) => explorer.setError(String(e)));
+            .catch((e: unknown) => explorer.setError(String(e)));
         }
         break;
       }
@@ -203,7 +207,7 @@ function App() {
         const terminalPath = contextMenu.target
           ? contextMenu.target.path
           : explorer.currentPath;
-        invoke('open_in_terminal', { path: terminalPath }).catch((e) =>
+        fs.openInTerminal(terminalPath).catch((e: unknown) =>
           explorer.setError(String(e))
         );
         break;
@@ -214,7 +218,7 @@ function App() {
           explorer.setShowPreview(true);
         } else {
           // No target — show properties of the current directory
-          invoke<FileEntry>('get_file_info', { path: explorer.currentPath })
+          fs.getFileInfo(explorer.currentPath)
             .then((dirEntry) => {
               explorer.setPreviewEntry(dirEntry);
               explorer.setShowPreview(true);
@@ -322,7 +326,7 @@ function App() {
             }}
             onDrop={async (sources, destination) => {
               try {
-                await invoke('move_items', { sources, destination });
+                await fs.moveItems(sources, destination);
                 explorer.refresh();
               } catch (e) {
                 explorer.setError(String(e));
@@ -382,11 +386,8 @@ function App() {
           const targetPath = contextMenu.target
             ? contextMenu.target.path
             : explorer.currentPath;
-          invoke('run_custom_context_action', {
-            command: action.command,
-            args: action.args,
-            path: targetPath,
-          }).catch((e) => explorer.setError(String(e)));
+          fs.runCustomContextAction(action.command, action.args, targetPath)
+            .catch((e: unknown) => explorer.setError(String(e)));
         }}
       />
 

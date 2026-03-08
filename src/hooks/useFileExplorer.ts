@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import type { FilesystemProvider } from '../filesystem/FilesystemProvider';
 import type { FileEntry, Tab, ClipboardData, SortField, SortDirection, ViewMode, AppSettings } from '../types';
 
 let tabIdCounter = 1;
@@ -8,7 +8,7 @@ function generateTabId(): string {
   return `tab-${tabIdCounter++}`;
 }
 
-export function useFileExplorer() {
+export function useFileExplorer(fs: FilesystemProvider) {
   const [currentPath, setCurrentPath] = useState<string>('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,11 +38,11 @@ export function useFileExplorer() {
   useEffect(() => {
     const init = async () => {
       try {
-        const home = await invoke<string>('get_home_directory');
-        const qaPaths = await invoke<[string, string][]>('get_quick_access_paths');
-        const vols = await invoke<{ name: string; mount_point: string }[]>('get_volumes');
-        const pinned = await invoke<string[]>('get_pinned_quick_access');
-        const appSettings = await invoke<AppSettings>('get_settings');
+        const home = await fs.getHomeDirectory();
+        const qaPaths = await fs.getQuickAccessPaths();
+        const vols = await fs.getVolumes();
+        const pinned = await fs.getPinnedQuickAccess();
+        const appSettings = await fs.getSettings();
         setQuickAccessPaths(qaPaths);
         setVolumes(vols);
         setPinnedPaths(pinned);
@@ -65,6 +65,7 @@ export function useFileExplorer() {
       }
     };
     init();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDirectory = useCallback(async (path: string, overrideShowHidden?: boolean) => {
@@ -73,10 +74,7 @@ export function useFileExplorer() {
     setSearchResults(null);
     setSearchQuery('');
     try {
-      const result = await invoke<FileEntry[]>('list_directory', {
-        path,
-        showHidden: overrideShowHidden ?? showHidden,
-      });
+      const result = await fs.listDirectory(path, overrideShowHidden ?? showHidden);
       setEntries(result);
       setCurrentPath(path);
       setSelectedPaths(new Set());
@@ -86,7 +84,7 @@ export function useFileExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [showHidden]);
+  }, [fs, showHidden]);
 
   const navigateTo = useCallback(async (path: string, replace = false, overrideShowHidden?: boolean) => {
     await loadDirectory(path, overrideShowHidden);
@@ -140,11 +138,11 @@ export function useFileExplorer() {
   }, [historyIndex, history, activeTabId, loadDirectory]);
 
   const goUp = useCallback(async () => {
-    const parent = await invoke<string | null>('get_parent_path', { path: currentPath });
+    const parent = await fs.getParentPath(currentPath);
     if (parent) {
       await navigateTo(parent);
     }
-  }, [currentPath, navigateTo]);
+  }, [fs, currentPath, navigateTo]);
 
   const refresh = useCallback(async () => {
     await loadDirectory(currentPath);
@@ -155,56 +153,56 @@ export function useFileExplorer() {
       await navigateTo(entry.path);
     } else {
       try {
-        await invoke('open_file', { path: entry.path });
+        await fs.openFile(entry.path);
       } catch (e) {
         setError(String(e));
       }
     }
-  }, [navigateTo]);
+  }, [fs, navigateTo]);
 
   const createNewFolder = useCallback(async (name: string) => {
     try {
       const newPath = `${currentPath}/${name}`;
-      await invoke('create_directory', { path: newPath });
+      await fs.createDirectory(newPath);
       await refresh();
     } catch (e) {
       setError(String(e));
     }
-  }, [currentPath, refresh]);
+  }, [fs, currentPath, refresh]);
 
   const createNewFile = useCallback(async (name: string) => {
     try {
       const newPath = `${currentPath}/${name}`;
-      await invoke('create_file', { path: newPath });
+      await fs.createFile(newPath);
       await refresh();
     } catch (e) {
       setError(String(e));
     }
-  }, [currentPath, refresh]);
+  }, [fs, currentPath, refresh]);
 
   const renameItem = useCallback(async (oldPath: string, newName: string) => {
     try {
       const parent = oldPath.substring(0, oldPath.lastIndexOf('/'));
       const newPath = `${parent}/${newName}`;
-      await invoke('rename_item', { oldPath, newPath });
+      await fs.renameItem(oldPath, newPath);
       setRenamingPath(null);
       await refresh();
     } catch (e) {
       setError(String(e));
     }
-  }, [refresh]);
+  }, [fs, refresh]);
 
   const deleteSelected = useCallback(async (useTrash = true) => {
     try {
       const paths = Array.from(selectedPaths);
       if (paths.length === 0) return;
-      await invoke('delete_items', { paths, useTrash });
+      await fs.deleteItems(paths, useTrash);
       setSelectedPaths(new Set());
       await refresh();
     } catch (e) {
       setError(String(e));
     }
-  }, [selectedPaths, refresh]);
+  }, [fs, selectedPaths, refresh]);
 
   const copyToClipboard = useCallback((paths?: string[]) => {
     const toCopy = paths || Array.from(selectedPaths);
@@ -222,22 +220,16 @@ export function useFileExplorer() {
     if (!clipboard) return;
     try {
       if (clipboard.operation === 'copy') {
-        await invoke('copy_items', {
-          sources: clipboard.paths,
-          destination: currentPath,
-        });
+        await fs.copyItems(clipboard.paths, currentPath);
       } else {
-        await invoke('move_items', {
-          sources: clipboard.paths,
-          destination: currentPath,
-        });
+        await fs.moveItems(clipboard.paths, currentPath);
         setClipboard(null);
       }
       await refresh();
     } catch (e) {
       setError(String(e));
     }
-  }, [clipboard, currentPath, refresh]);
+  }, [fs, clipboard, currentPath, refresh]);
 
   const search = useCallback(async (query: string) => {
     setSearchQuery(query);
@@ -247,45 +239,41 @@ export function useFileExplorer() {
     }
     setIsSearching(true);
     try {
-      const result = await invoke<{ entries: FileEntry[]; total: number }>('search_files', {
-        directory: currentPath,
-        query: query.trim(),
-        maxResults: 200,
-      });
+      const result = await fs.searchFiles(currentPath, query.trim(), 200);
       setSearchResults(result.entries);
     } catch (e) {
       setError(String(e));
     } finally {
       setIsSearching(false);
     }
-  }, [currentPath]);
+  }, [fs, currentPath]);
 
   const pinQuickAccess = useCallback(async (path: string) => {
     try {
-      const updated = await invoke<string[]>('add_pinned_quick_access', { path });
+      const updated = await fs.addPinnedQuickAccess(path);
       setPinnedPaths(updated);
     } catch (e) {
       setError(String(e));
     }
-  }, []);
+  }, [fs]);
 
   const saveSettings = useCallback(async (newSettings: AppSettings) => {
     try {
-      await invoke('save_settings', { settings: newSettings });
+      await fs.saveSettings(newSettings);
       setSettingsState(newSettings);
     } catch (e) {
       setError(String(e));
     }
-  }, []);
+  }, [fs]);
 
   const unpinQuickAccess = useCallback(async (path: string) => {
     try {
-      const updated = await invoke<string[]>('remove_pinned_quick_access', { path });
+      const updated = await fs.removePinnedQuickAccess(path);
       setPinnedPaths(updated);
     } catch (e) {
       setError(String(e));
     }
-  }, []);
+  }, [fs]);
 
   const addTab = useCallback(async (targetPath?: string) => {
     const path = targetPath || currentPath;
@@ -381,18 +369,19 @@ export function useFileExplorer() {
     setShowHidden(value);
     try {
       const newSettings = { ...settings, show_hidden: value };
-      await invoke('save_settings', { settings: newSettings });
+      await fs.saveSettings(newSettings);
       setSettingsState(newSettings);
     } catch (e) {
       setError(String(e));
     }
-  }, [settings]);
+  }, [fs, settings]);
 
   // Reload when showHidden changes
   useEffect(() => {
     if (currentPath) {
       loadDirectory(currentPath);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHidden]);
 
   return {
@@ -450,5 +439,7 @@ export function useFileExplorer() {
     selectAll,
     clearSelection,
     toggleSort,
+    // Expose the provider so App.tsx can call it for commands not yet in the hook
+    fs,
   };
 }
