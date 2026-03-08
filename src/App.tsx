@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFileExplorer } from './hooks/useFileExplorer';
 import type { FilesystemProvider } from './filesystem/FilesystemProvider';
 import { Sidebar } from './components/Sidebar';
@@ -17,6 +17,13 @@ interface AppProps {
 
 function App({ fs }: AppProps) {
   const explorer = useFileExplorer(fs);
+  // Receives scrollToIndex from FileList's virtualizer so keyboard navigation
+  // can keep the selected row in view.
+  const scrollToIndexRef = useRef<((index: number) => void) | null>(null);
+  const handleVirtualizerReady = useCallback((fn: (index: number) => void) => {
+    scrollToIndexRef.current = fn;
+  }, []);
+
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,
@@ -125,6 +132,7 @@ function App({ fs }: AppProps) {
 
         explorer.toggleSelection(currentEntries[newIndex].path, false);
         explorer.setPreviewEntry(currentEntries[newIndex]);
+        scrollToIndexRef.current?.(newIndex);
       } else if (meta && e.key === 'p') {
         e.preventDefault();
         explorer.setShowPreview(!explorer.showPreview);
@@ -333,6 +341,7 @@ function App({ fs }: AppProps) {
               }
             }}
             loading={explorer.loading}
+            onVirtualizerReady={handleVirtualizerReady}
           />
         </div>
         <PreviewPanel

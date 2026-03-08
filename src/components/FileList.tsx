@@ -1,6 +1,20 @@
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import {
+  useState, useRef, useEffect, useCallback, memo, useLayoutEffect,
+} from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { FileEntry, ViewMode, SortField, SortDirection, ContextMenuState } from '../types';
 import { formatFileSize, formatDate, getFileIcon, getFileType } from '../utils/format';
+
+// Row heights must match CSS exactly so the virtual spacer is the right size.
+const DETAILS_ROW_HEIGHT = 30; // .file-row { height: 30px }
+const LIST_ROW_HEIGHT = 28;    // .file-list-item: 12px font * 1.4 lh + 8px padding = ~28px
+const GRID_ITEM_WIDTH = 96;    // .file-grid-item { width: 96px }
+const GRID_ITEM_HEIGHT = 110;  // icon 40px + mb 4px + name ~2 lines + padding 10/6px
+const GRID_GAP = 4;            // gap: 4px
+const GRID_PADDING = 12;       // padding: 12px on .file-grid
+// Rows above/below the visible window that stay mounted. Keeps scrolling smooth
+// and ensures the rename input is reachable for items just off-screen.
+const OVERSCAN = 10;
 
 interface FileListProps {
   entries: FileEntry[];
@@ -18,10 +32,13 @@ interface FileListProps {
   onPreview: (entry: FileEntry) => void;
   onDrop: (sources: string[], destination: string) => void;
   loading: boolean;
+  /** Called with a scrollToIndex function so the parent (App) can scroll on
+   *  keyboard arrow-key navigation. */
+  onVirtualizerReady?: (scrollToIndex: (index: number) => void) => void;
 }
 
 // ---------------------------------------------------------------------------
-// Rename input — extracted so it can be memoized independently
+// Rename input
 // ---------------------------------------------------------------------------
 
 interface RenameInputProps {
@@ -56,21 +73,7 @@ const RenameInput = memo(({ path, initialName, inputRef, onSubmit, onCancel }: R
 });
 
 // ---------------------------------------------------------------------------
-// Memoized row components
-//
-// Each row receives only the data it needs plus stable callbacks (useCallback
-// in the parent).  React.memo means a row only re-renders when its specific
-// props change — a selection toggle on row 5 will not re-render rows 1-4 or
-// 6-N.
-//
-// NOTE on event delegation vs per-row handlers
-// ─────────────────────────────────────────────
-// We still attach handlers here because each row needs to pass its specific
-// `entry` object.  The alternative (pure delegation via data-attributes) would
-// require a Map<path, FileEntry> on the parent to look up the entry on click,
-// which adds complexity.  The win from React.memo already avoids most
-// unnecessary re-renders; the handler objects themselves are cheap once React
-// knows it doesn't need to reconcile the row.
+// Row components — identical to before; virtualization is in the parent
 // ---------------------------------------------------------------------------
 
 interface RowProps {
@@ -212,15 +215,107 @@ export const FileList = memo(({
   onPreview,
   onDrop,
   loading,
+  onVirtualizerReady,
 }: FileListProps) => {
   const [dragOverPath, setDragOverPath] = useState<string | null>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus and set selection range on the rename input when it appears
+  // Scroll containers — one ref per view mode. useVirtualizer needs a stable
+  // ref to the scrollable element.
+  const detailsBodyRef = useRef<HTMLDivElement>(null);
+  const listBodyRef = useRef<HTMLDivElement>(null);
+  const gridBodyRef = useRef<HTMLDivElement>(null);
+
+  // Grid column count — derived from container width, recalculated on resize.
+  const [gridColumns, setGridColumns] = useState(6);
+  useLayoutEffect(() => {
+    const el = gridBodyRef.current;
+    if (!el) return;
+    const update = () => {
+      const available = el.clientWidth - GRID_PADDING * 2;
+      const cols = Math.max(1, Math.floor((available + GRID_GAP) / (GRID_ITEM_WIDTH + GRID_GAP)));
+      setGridColumns(cols);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [viewMode]); // re-run when switching to grid so ref is populated
+
+  // ── Virtualizers ───────────────────────────────────────────────────────────
+
+  const detailsVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => detailsBodyRef.current,
+    estimateSize: () => DETAILS_ROW_HEIGHT,
+    overscan: OVERSCAN,
+  });
+
+  const listVirtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => listBodyRef.current,
+    estimateSize: () => LIST_ROW_HEIGHT,
+    overscan: OVERSCAN,
+  });
+
+  // Grid virtualizer: each "row" holds `gridColumns` items.
+  const gridRowCount = Math.ceil(entries.length / gridColumns);
+  const gridVirtualizer = useVirtualizer({
+    count: gridRowCount,
+    getScrollElement: () => gridBodyRef.current,
+    estimateSize: () => GRID_ITEM_HEIGHT + GRID_GAP,
+    overscan: OVERSCAN,
+  });
+
+  // ── Expose scrollToIndex to the parent ────────────────────────────────────
+  // App.tsx uses this for keyboard arrow-key navigation so the selected row
+  // is always scrolled into view even when it's outside the virtual window.
   useEffect(() => {
-    if (renamingPath && renameInputRef.current) {
-      const entry = entries.find(e => e.path === renamingPath);
-      if (entry) {
+    if (!onVirtualizerReady) return;
+    const scrollToIndex = (index: number) => {
+      if (viewMode === 'details') {
+        detailsVirtualizer.scrollToIndex(index, { align: 'auto' });
+      } else if (viewMode === 'list') {
+        listVirtualizer.scrollToIndex(index, { align: 'auto' });
+      } else {
+        const rowIndex = Math.floor(index / gridColumns);
+        gridVirtualizer.scrollToIndex(rowIndex, { align: 'auto' });
+      }
+    };
+    onVirtualizerReady(scrollToIndex);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onVirtualizerReady, viewMode, gridColumns]);
+
+  // ── Scroll to top when the directory changes ──────────────────────────────
+  // `entries` is a new array reference every time loadDirectory() completes.
+  // Reset all three scroll containers so a freshly-navigated folder always
+  // starts at the top regardless of which view mode is active.
+  useEffect(() => {
+    if (detailsBodyRef.current) detailsBodyRef.current.scrollTop = 0;
+    if (listBodyRef.current)    listBodyRef.current.scrollTop = 0;
+    if (gridBodyRef.current)    gridBodyRef.current.scrollTop = 0;
+  }, [entries]);
+
+  // ── Rename: focus + selection range ───────────────────────────────────────
+  // When renamingPath is set, first scroll the target index into view so the
+  // virtualizer renders its row, then focus the input on the next frame.
+  useEffect(() => {
+    if (!renamingPath) return;
+    const index = entries.findIndex(e => e.path === renamingPath);
+    if (index === -1) return;
+
+    if (viewMode === 'details') {
+      detailsVirtualizer.scrollToIndex(index, { align: 'auto' });
+    } else if (viewMode === 'list') {
+      listVirtualizer.scrollToIndex(index, { align: 'auto' });
+    } else {
+      gridVirtualizer.scrollToIndex(Math.floor(index / gridColumns), { align: 'auto' });
+    }
+
+    // Wait one frame for the virtualizer to mount the row, then focus.
+    const raf = requestAnimationFrame(() => {
+      if (renameInputRef.current) {
+        const entry = entries[index];
         renameInputRef.current.focus();
         const dotIndex = entry.name.lastIndexOf('.');
         if (dotIndex > 0 && !entry.is_dir) {
@@ -229,14 +324,12 @@ export const FileList = memo(({
           renameInputRef.current.select();
         }
       }
-    }
-  }, [renamingPath, entries]);
+    });
+    return () => cancelAnimationFrame(raf);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renamingPath]);
 
   // ── Stable callbacks ───────────────────────────────────────────────────────
-  //
-  // useCallback here is important: these are passed as props to every row
-  // component.  Without it, every render of FileList would produce new function
-  // references, defeating React.memo on the row components entirely.
 
   const handleRenameSubmit = useCallback((path: string, newName: string) => {
     onRename(path, newName);
@@ -279,9 +372,7 @@ export const FileList = memo(({
     }
   }, []);
 
-  const handleDragLeave = useCallback(() => {
-    setDragOverPath(null);
-  }, []);
+  const handleDragLeave = useCallback(() => setDragOverPath(null), []);
 
   const handleRowDrop = useCallback((e: React.DragEvent, entry: FileEntry) => {
     e.preventDefault();
@@ -294,7 +385,7 @@ export const FileList = memo(({
   }, [onDrop]);
 
   const handleBackgroundContextMenu = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.file-row, .file-grid-item')) return;
+    if ((e.target as HTMLElement).closest('.file-row, .file-grid-item, .file-list-item')) return;
     e.preventDefault();
     onContextMenu({ visible: true, x: e.clientX, y: e.clientY, target: null });
   }, [onContextMenu]);
@@ -304,7 +395,6 @@ export const FileList = memo(({
     return sortDirection === 'asc' ? ' ▲' : ' ▼';
   }, [sortField, sortDirection]);
 
-  // ── Shared row props (avoids rebuilding this object in every map call) ──────
   const rowHandlers = {
     renameInputRef,
     onRenameSubmit: handleRenameSubmit,
@@ -336,68 +426,141 @@ export const FileList = memo(({
     );
   }
 
-  if (viewMode === 'grid') {
+  // ── Details view ───────────────────────────────────────────────────────────
+  if (viewMode === 'details') {
+    const items = detailsVirtualizer.getVirtualItems();
     return (
-      <div className="file-grid" onContextMenu={handleBackgroundContextMenu}>
-        {entries.map(entry => (
-          <GridItem
-            key={entry.path}
-            entry={entry}
-            isSelected={selectedPaths.has(entry.path)}
-            isDragOver={dragOverPath === entry.path}
-            isRenaming={renamingPath === entry.path}
-            {...rowHandlers}
-          />
-        ))}
+      <div className="file-details">
+        <div className="details-header">
+          <div className="details-col col-name" onClick={() => onToggleSort('name')}>
+            Name{sortIndicator('name')}
+          </div>
+          <div className="details-col col-modified" onClick={() => onToggleSort('modified')}>
+            Date Modified{sortIndicator('modified')}
+          </div>
+          <div className="details-col col-type" onClick={() => onToggleSort('extension')}>
+            Type{sortIndicator('extension')}
+          </div>
+          <div className="details-col col-size" onClick={() => onToggleSort('size')}>
+            Size{sortIndicator('size')}
+          </div>
+        </div>
+
+        {/* Scroll container — must have a fixed height for the virtualizer */}
+        <div
+          ref={detailsBodyRef}
+          className="details-body"
+          onContextMenu={handleBackgroundContextMenu}
+        >
+          {/* Total height spacer — makes the scrollbar accurate */}
+          <div style={{ height: detailsVirtualizer.getTotalSize(), position: 'relative' }}>
+            {/* Absolutely-positioned strip containing only the visible rows */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${items[0]?.start ?? 0}px)`,
+              }}
+            >
+              {items.map(virtualRow => {
+                const entry = entries[virtualRow.index];
+                return (
+                  <DetailsRow
+                    key={entry.path}
+                    entry={entry}
+                    isSelected={selectedPaths.has(entry.path)}
+                    isDragOver={dragOverPath === entry.path}
+                    isRenaming={renamingPath === entry.path}
+                    {...rowHandlers}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // ── List view ──────────────────────────────────────────────────────────────
   if (viewMode === 'list') {
+    const items = listVirtualizer.getVirtualItems();
     return (
-      <div className="file-list-view" onContextMenu={handleBackgroundContextMenu}>
-        {entries.map(entry => (
-          <ListItem
-            key={entry.path}
-            entry={entry}
-            isSelected={selectedPaths.has(entry.path)}
-            isDragOver={dragOverPath === entry.path}
-            isRenaming={renamingPath === entry.path}
-            {...rowHandlers}
-          />
-        ))}
+      <div
+        ref={listBodyRef}
+        className="file-list-view"
+        onContextMenu={handleBackgroundContextMenu}
+      >
+        <div style={{ height: listVirtualizer.getTotalSize(), position: 'relative' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${items[0]?.start ?? 0}px)`,
+            }}
+          >
+            {items.map(virtualRow => {
+              const entry = entries[virtualRow.index];
+              return (
+                <ListItem
+                  key={entry.path}
+                  entry={entry}
+                  isSelected={selectedPaths.has(entry.path)}
+                  isDragOver={dragOverPath === entry.path}
+                  isRenaming={renamingPath === entry.path}
+                  {...rowHandlers}
+                />
+              );
+            })}
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Details view (default)
+  // ── Grid view ──────────────────────────────────────────────────────────────
+  // The grid virtualizer works row-by-row. Each virtual row contains
+  // `gridColumns` items laid out in a flex row.
+  const gridRows = gridVirtualizer.getVirtualItems();
   return (
-    <div className="file-details" onContextMenu={handleBackgroundContextMenu}>
-      <div className="details-header">
-        <div className="details-col col-name" onClick={() => onToggleSort('name')}>
-          Name{sortIndicator('name')}
+    <div
+      ref={gridBodyRef}
+      className="file-grid-virtual"
+      onContextMenu={handleBackgroundContextMenu}
+    >
+      <div style={{ height: gridVirtualizer.getTotalSize(), position: 'relative' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            transform: `translateY(${gridRows[0]?.start ?? 0}px)`,
+          }}
+        >
+          {gridRows.map(virtualRow => {
+            const rowStartIndex = virtualRow.index * gridColumns;
+            const rowItems = entries.slice(rowStartIndex, rowStartIndex + gridColumns);
+            return (
+              <div key={virtualRow.index} className="file-grid-row">
+                {rowItems.map(entry => (
+                  <GridItem
+                    key={entry.path}
+                    entry={entry}
+                    isSelected={selectedPaths.has(entry.path)}
+                    isDragOver={dragOverPath === entry.path}
+                    isRenaming={renamingPath === entry.path}
+                    {...rowHandlers}
+                  />
+                ))}
+              </div>
+            );
+          })}
         </div>
-        <div className="details-col col-modified" onClick={() => onToggleSort('modified')}>
-          Date Modified{sortIndicator('modified')}
-        </div>
-        <div className="details-col col-type" onClick={() => onToggleSort('extension')}>
-          Type{sortIndicator('extension')}
-        </div>
-        <div className="details-col col-size" onClick={() => onToggleSort('size')}>
-          Size{sortIndicator('size')}
-        </div>
-      </div>
-      <div className="details-body">
-        {entries.map(entry => (
-          <DetailsRow
-            key={entry.path}
-            entry={entry}
-            isSelected={selectedPaths.has(entry.path)}
-            isDragOver={dragOverPath === entry.path}
-            isRenaming={renamingPath === entry.path}
-            {...rowHandlers}
-          />
-        ))}
       </div>
     </div>
   );

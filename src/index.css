@@ -759,8 +759,11 @@ body {
 
 .details-body {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
+  /* min-height: 0 is required inside a flex column so the child can shrink
+     and the virtualizer's scroll container gets a real bounded height */
+  min-height: 0;
 }
 
 .details-col {
@@ -846,14 +849,18 @@ body {
    File List - Grid View
    ================================================================ */
 
-.file-grid {
+.file-grid-virtual {
   flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: 4px;
+  overflow-y: scroll;
   padding: 12px;
-  overflow-y: auto;
+  min-height: 0;
+}
+
+.file-grid-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
 .file-grid-item {
@@ -908,8 +915,9 @@ body {
 
 .file-list-view {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   padding: 4px;
+  min-height: 0;
 }
 
 .file-list-item {
@@ -1338,8 +1346,8 @@ body {
    ================================================================ */
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1353,21 +1361,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
-}
-
-/* Auto-hide scrollbar on non-hover */
-.sidebar::-webkit-scrollbar-thumb,
-.details-body::-webkit-scrollbar-thumb,
-.file-grid::-webkit-scrollbar-thumb,
-.file-list-view::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-
-.sidebar:hover::-webkit-scrollbar-thumb,
-.details-body:hover::-webkit-scrollbar-thumb,
-.file-grid:hover::-webkit-scrollbar-thumb,
-.file-list-view:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
 }
 
 /* ================================================================
