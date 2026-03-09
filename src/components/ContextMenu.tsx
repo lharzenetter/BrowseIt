@@ -21,7 +21,6 @@ interface ContextMenuProps {
   onUnpinQuickAccess: (path: string) => void;
   isPinned: boolean;
   hasClipboard: boolean;
-  selectionCount: number;
   customActions: CustomContextAction[];
   onCustomAction: (action: CustomContextAction) => void;
 }
