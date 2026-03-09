@@ -1,14 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { FilesystemProvider } from '../filesystem/FilesystemProvider';
 import type { FileEntry, Tab, ClipboardData, SortField, SortDirection, ViewMode, AppSettings } from '../types';
 
-let tabIdCounter = 1;
-
-function generateTabId(): string {
-  return `tab-${tabIdCounter++}`;
-}
-
 export function useFileExplorer(fs: FilesystemProvider) {
+  const tabIdCounterRef = useRef(1);
+  const generateTabId = useCallback(() => `tab-${tabIdCounterRef.current++}`, []);
   const [currentPath, setCurrentPath] = useState<string>('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);

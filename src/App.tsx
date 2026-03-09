@@ -307,7 +307,7 @@ function App({ fs }: AppProps) {
           currentPath={explorer.currentPath}
           onNavigate={(path) => explorer.navigateTo(path)}
           onUnpin={(path) => explorer.unpinQuickAccess(path)}
-          hiddenHomePaths={explorer.settings.hidden_home_paths ?? []}
+          hiddenHomePaths={explorer.settings.hidden_home_paths}
         />
         <div className="content-area">
           {explorer.error && (
@@ -389,7 +389,7 @@ function App({ fs }: AppProps) {
             : false
         }
         hasClipboard={explorer.clipboard !== null}
-        customActions={explorer.settings.custom_context_actions ?? []}
+        customActions={explorer.settings.custom_context_actions}
         onCustomAction={(action: CustomContextAction) => {
           closeContextMenu();
           const targetPath = contextMenu.target
@@ -471,7 +471,7 @@ function App({ fs }: AppProps) {
             <div className="settings-section">
               <label className="settings-label">Custom Context Menu Actions</label>
               <div className="settings-custom-actions-list">
-                {(explorer.settings.custom_context_actions ?? []).map((action) => (
+                {explorer.settings.custom_context_actions.map((action) => (
                   <div key={action.id} className="settings-custom-action-item">
                     <div className="settings-custom-action-info">
                       <span className="settings-custom-action-label">{action.label}</span>
@@ -493,7 +493,7 @@ function App({ fs }: AppProps) {
                         className="settings-custom-action-btn danger"
                         title="Remove"
                         onClick={() => {
-                          const updated = (explorer.settings.custom_context_actions ?? []).filter(
+                          const updated = explorer.settings.custom_context_actions.filter(
                             (a) => a.id !== action.id
                           );
                           explorer.saveSettings({
@@ -510,7 +510,7 @@ function App({ fs }: AppProps) {
                     </div>
                   </div>
                 ))}
-                {(explorer.settings.custom_context_actions ?? []).length === 0 && (
+                {explorer.settings.custom_context_actions.length === 0 && (
                   <div className="settings-custom-actions-empty">
                     No custom actions configured. Add one to open files or folders in your favourite apps.
                   </div>
@@ -521,7 +521,7 @@ function App({ fs }: AppProps) {
               {editingAction ? (
                 <div className="settings-custom-action-form">
                   <div className="settings-custom-action-form-title">
-                    {(explorer.settings.custom_context_actions ?? []).some((a) => a.id === editingAction.id)
+                    {explorer.settings.custom_context_actions.some((a) => a.id === editingAction.id)
                       ? 'Edit Action'
                       : 'New Action'}
                   </div>
@@ -582,7 +582,7 @@ function App({ fs }: AppProps) {
                       className="settings-btn settings-btn-primary"
                       disabled={!editingAction.label.trim() || !editingAction.command.trim()}
                       onClick={() => {
-                        const actions = [...(explorer.settings.custom_context_actions ?? [])];
+                        const actions = [...explorer.settings.custom_context_actions];
                         const idx = actions.findIndex((a) => a.id === editingAction.id);
                         if (idx >= 0) {
                           actions[idx] = editingAction;
@@ -623,13 +623,13 @@ function App({ fs }: AppProps) {
               <label className="settings-label">Home Sidebar Items</label>
               <div className="settings-home-items-list">
                 {explorer.quickAccessPaths.map(([name, path]) => {
-                  const isHidden = (explorer.settings.hidden_home_paths ?? []).includes(path);
+                  const isHidden = explorer.settings.hidden_home_paths.includes(path);
                   return (
                     <div
                       key={path}
                       className={`settings-home-item${isHidden ? ' disabled' : ''}`}
                       onClick={() => {
-                        const current = explorer.settings.hidden_home_paths ?? [];
+                        const current = explorer.settings.hidden_home_paths;
                         const updated = isHidden
                           ? current.filter((p) => p !== path)
                           : [...current, path];
