@@ -388,7 +388,6 @@ function App({ fs }: AppProps) {
             : false
         }
         hasClipboard={explorer.clipboard !== null}
-        selectionCount={explorer.selectedPaths.size}
         customActions={explorer.settings.custom_context_actions ?? []}
         onCustomAction={(action: CustomContextAction) => {
           closeContextMenu();
