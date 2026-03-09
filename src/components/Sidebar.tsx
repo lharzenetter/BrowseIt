@@ -93,6 +93,7 @@ const SIDEBAR_ICONS: Record<string, ReactNode> = {
   ),
 };
 
+
 interface SidebarProps {
   quickAccessPaths: [string, string][];
   pinnedPaths: string[];
