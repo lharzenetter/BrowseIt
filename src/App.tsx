@@ -348,6 +348,7 @@ function App({ fs }: AppProps) {
           entry={explorer.previewEntry}
           visible={explorer.showPreview}
           onClose={() => explorer.setShowPreview(false)}
+          onReadFile={(path) => explorer.fs.readTextFile(path)}
         />
       </div>
       <StatusBar

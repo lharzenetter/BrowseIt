@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import type { FileEntry } from '../types';
 import { formatFileSize, formatDate, getFileIcon, getFileType } from '../utils/format';
 
@@ -7,12 +6,14 @@ interface PreviewPanelProps {
   entry: FileEntry | null;
   visible: boolean;
   onClose: () => void;
+  onReadFile: (path: string) => Promise<string>;
 }
 
 export const PreviewPanel = ({
   entry,
   visible,
   onClose,
+  onReadFile,
 }: PreviewPanelProps) => {
   const [textPreview, setTextPreview] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -31,12 +32,12 @@ export const PreviewPanel = ({
     const ext = entry.extension.toLowerCase();
     if (textExtensions.includes(ext) || entry.size < 50000) {
       setLoadingPreview(true);
-      invoke<string>('read_text_file', { path: entry.path })
+      onReadFile(entry.path)
         .then(setTextPreview)
         .catch(() => setTextPreview(null))
         .finally(() => setLoadingPreview(false));
     }
-  }, [entry]);
+  }, [entry, onReadFile]);
 
   if (!visible || !entry) return null;
 
