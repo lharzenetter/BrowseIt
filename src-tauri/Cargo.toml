@@ -30,5 +30,5 @@ chrono = "0.4"
 trash = "5"
 open = "5"
 urlencoding = "2"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+zip = { version = "8", default-features = false, features = ["deflate"] }
 shell-words = "1"
