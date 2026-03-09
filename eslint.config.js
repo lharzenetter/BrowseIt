@@ -26,6 +26,8 @@ export default defineConfig([
         caughtErrorsIgnorePattern: '^_',
       }],
       'no-empty': ['error', { allowEmptyCatch: true }],
+      // Syncing/resetting state in useEffect on prop change is intentional in this codebase
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ])
