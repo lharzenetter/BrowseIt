@@ -1,7 +1,8 @@
 import { Fragment, useState, useEffect, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import type { FilesystemProvider } from '../filesystem/FilesystemProvider';
 
 interface AddressBarProps {
+  fs: FilesystemProvider;
   currentPath: string;
   onNavigate: (path: string) => void;
   searchQuery: string;
@@ -16,6 +17,7 @@ interface AddressBarProps {
 }
 
 export const AddressBar = ({
+  fs,
   currentPath,
   onNavigate,
   searchQuery,
@@ -40,9 +42,7 @@ export const AddressBar = ({
     setEditPath(currentPath);
     const loadBreadcrumbs = async () => {
       try {
-        const components = await invoke<[string, string][]>('get_path_components', {
-          path: currentPath,
-        });
+        const components = await fs.getPathComponents(currentPath);
         setBreadcrumbs(components);
       } catch (_e) {
         setBreadcrumbs([]);
