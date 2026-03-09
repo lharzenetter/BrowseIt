@@ -102,17 +102,15 @@ fn list_directory(path: String, show_hidden: bool) -> Result<Vec<FileEntry>, Str
     let read_dir =
         fs::read_dir(dir_path).map_err(|e| format!("Failed to read directory: {}", e))?;
 
-    for entry in read_dir {
-        if let Ok(entry) = entry {
-            let path = entry.path();
-            match file_entry_from_path_safe(&path) {
-                Ok(file_entry) => {
-                    if show_hidden || !file_entry.is_hidden {
-                        entries.push(file_entry);
-                    }
+    for entry in read_dir.flatten() {
+        let path = entry.path();
+        match file_entry_from_path_safe(&path) {
+            Ok(file_entry) => {
+                if show_hidden || !file_entry.is_hidden {
+                    entries.push(file_entry);
                 }
-                Err(_) => continue,
             }
+            Err(_) => continue,
         }
     }
 
@@ -321,10 +319,9 @@ fn open_in_terminal(path: String) -> Result<(), String> {
             .unwrap_or(path)
     };
 
-    let settings = get_settings().unwrap_or_default();
-
     #[cfg(target_os = "macos")]
     {
+        let settings = get_settings().unwrap_or_default();
         std::process::Command::new("open")
             .args(["-a", &settings.terminal, &dir])
             .spawn()

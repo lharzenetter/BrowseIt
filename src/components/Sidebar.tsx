@@ -1,5 +1,16 @@
 import { useState, type ReactNode } from 'react';
 
+const Chevron = ({ expanded }: { expanded: boolean }) => (
+  <svg
+    className={`sidebar-chevron ${expanded ? 'expanded' : ''}`}
+    width="12"
+    height="12"
+    viewBox="0 0 12 12"
+  >
+    <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 interface SidebarProps {
   quickAccessPaths: [string, string][];
   pinnedPaths: string[];
@@ -103,17 +114,6 @@ export const Sidebar = ({
       <rect x="2" y="4" width="12" height="8" rx="1.5" stroke="#666" strokeWidth="1.2"/>
       <rect x="3.5" y="6" width="5" height="1.5" rx="0.5" fill="#4FC3F7"/>
       <circle cx="12" cy="9" r="0.8" fill="#4CAF50"/>
-    </svg>
-  );
-
-  const Chevron = ({ expanded }: { expanded: boolean }) => (
-    <svg
-      className={`sidebar-chevron ${expanded ? 'expanded' : ''}`}
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-    >
-      <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 
