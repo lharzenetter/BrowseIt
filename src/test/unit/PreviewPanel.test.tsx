@@ -34,14 +34,14 @@ function pendingPromise<T>(): Promise<T> {
 // ---------------------------------------------------------------------------
 
 describe('PreviewPanel', () => {
-  let onReadFile: ReturnType<typeof vi.fn>;
-  let onClose: ReturnType<typeof vi.fn>;
+  let onReadFile: ReturnType<typeof vi.fn<(path: string) => Promise<string>>>;
+  let onClose: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
     // Default: never settles — prevents spurious act() warnings in tests that
     // only care about synchronous rendering and don't need the preview content.
-    onReadFile = vi.fn().mockReturnValue(pendingPromise());
-    onClose = vi.fn();
+    onReadFile = vi.fn<(path: string) => Promise<string>>().mockReturnValue(pendingPromise());
+    onClose = vi.fn<() => void>();
   });
 
   // ── Visibility guard ───────────────────────────────────────────────────
