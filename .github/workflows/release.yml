@@ -1,9 +1,10 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
@@ -11,11 +12,46 @@ on:
         required: true
 
 jobs:
+  check-release:
+    name: Check for new release
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+      should-release: ${{ steps.get-tag.outputs.should-release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get latest release tag
+        id: get-tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "should-release=true" >> "$GITHUB_OUTPUT"
+          else
+            # Get the latest tag pointing at HEAD
+            TAG=$(git tag --points-at HEAD | grep '^v' | head -n 1)
+            if [ -n "$TAG" ]; then
+              echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+              echo "should-release=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should-release=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
   build-macos:
     name: Build macOS
+    needs: check-release
+    if: needs.check-release.outputs.should-release == 'true'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.check-release.outputs.tag }}
 
       - uses: actions/setup-node@v6
         with:
@@ -52,7 +88,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name || inputs.tag }}
+          tag_name: ${{ needs.check-release.outputs.tag }}
           files: |
             src-tauri/target/release/bundle/dmg/*.dmg
           generate_release_notes: true
