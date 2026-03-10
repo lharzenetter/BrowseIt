@@ -48,6 +48,8 @@ jobs:
     needs: check-release
     if: needs.check-release.outputs.should-release == 'true'
     runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -85,11 +87,14 @@ jobs:
             src-tauri/target/release/bundle/macos/*.app.tar.gz
           if-no-files-found: warn
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.check-release.outputs.tag }}
-          files: |
-            src-tauri/target/release/bundle/dmg/*.dmg
-          generate_release_notes: true
-          draft: true
+      - name: Upload assets to existing release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.check-release.outputs.tag }}"
+          for file in src-tauri/target/release/bundle/dmg/*.dmg; do
+            if [ -f "$file" ]; then
+              echo "Uploading $file to release $TAG"
+              gh release upload "$TAG" "$file" --clobber
+            fi
+          done
