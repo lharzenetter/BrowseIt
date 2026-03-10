@@ -111,7 +111,7 @@ jobs:
         run: npm ci
 
       - name: Install semantic-release plugins
-        run: npm install -g semantic-release @semantic-release/github @semantic-release/git @semantic-release/npm
+        run: npm install -g semantic-release @semantic-release/github @semantic-release/git @semantic-release/npm @semantic-release/exec
 
       - name: Run semantic-release
         run: semantic-release
